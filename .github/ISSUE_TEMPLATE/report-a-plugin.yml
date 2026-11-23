@@ -1,0 +1,45 @@
+name: Report a plugin
+description: A plugin is broken, misleading or does something it shouldn't.
+body:
+  - type: input
+    id: plugin
+    attributes:
+      label: Plugin id and version
+      placeholder: example-plugin 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: holyarrs
+    attributes:
+      label: HolyArrs version
+      placeholder: 1.2.1
+    validations:
+      required: true
+  - type: dropdown
+    id: cpu
+    attributes:
+      label: CPU type
+      description: Most PCs and NAS boxes are amd64. A Raspberry Pi on a 64-bit system is arm64, on a 32-bit one armv7. Not sure is fine.
+      options:
+        - amd64
+        - arm64
+        - armv7
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what the plugin did instead.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Plugin log lines
+      description: Optional. Remove any keys or passwords first.
+      render: text
+  - type: markdown
+    attributes:
+      value: If the plugin looks harmful, please report it privately instead, through the security link on the previous screen.

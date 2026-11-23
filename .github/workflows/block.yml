@@ -1,0 +1,251 @@
+# Puts a plugin version (or every version of a plugin) on the signed
+# blocklist, or one plugin file by its sha256. HolyArrs refuses to install it
+# and stops copies already running at its next check.
+name: HolyArrs Plugins - Block a version
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: Plugin id (can be empty when sha256 is given)
+        default: ""
+      version:
+        description: Version to block (leave empty to block every version)
+        default: ""
+      sha256:
+        description: Block one plugin file by its sha256 instead (optional)
+        default: ""
+      reason:
+        description: Why it is blocked (kept in block-reasons.txt on plugins.holyarrs.com)
+        default: ""
+      remove_keys:
+        description: Or delete old files instead (no block). Object keys separated by spaces, for example plugins/x/1.0.0/manifest.json. A file a live list still names is refused
+        default: ""
+      dry_run:
+        description: Sign and check only. Nothing is uploaded
+        type: boolean
+        default: true
+      app_ref:
+        description: HolyArrs release tag to take the signing tool from (for example 1.2.1)
+        default: ""
+      live_url:
+        description: Live site to compare against. Empty skips that check (only before the site is up)
+        default: https://plugins.holyarrs.com/
+
+permissions:
+  contents: read
+
+# One list change at a time, so two runs never sign the same counter.
+concurrency:
+  group: plugin-lists
+  cancel-in-progress: false
+
+jobs:
+  block:
+    if: github.ref == 'refs/heads/main' && inputs.remove_keys == ''
+    # GitHub-hosted only: the key file must never land on a runner that is kept.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Settings > Environments > plugin-signing must allow only main and hold
+    # the key (it has no passphrase) as an environment secret, never a repo secret.
+    environment:
+      name: plugin-signing
+      deployment: false   # keep the key protected, no public deployment record
+    permissions:
+      # write: the run commits .github/state/lists.json after a successful upload.
+      contents: write
+    steps:
+      - name: Check the inputs
+        id: check
+        env:
+          IN_ID: ${{ inputs.id }}
+          IN_VERSION: ${{ inputs.version }}
+          IN_SHA: ${{ inputs.sha256 }}
+          IN_REF: ${{ inputs.app_ref }}
+          IN_LIVE: ${{ inputs.live_url }}
+          IN_REASON: ${{ inputs.reason }}
+        run: |
+          [ -n "$IN_REASON" ] || { echo "give a reason for the block"; exit 1; }
+          [ -n "$IN_ID" ] || [ -n "$IN_SHA" ] || { echo "give a plugin id or a sha256"; exit 1; }
+          [ -z "$IN_ID" ] || [[ "$IN_ID" =~ ^[a-z0-9][a-z0-9-]{0,63}$ ]] || { echo "bad plugin id"; exit 1; }
+          [ -z "$IN_SHA" ] || [[ "$IN_SHA" =~ ^[0-9a-f]{64}$ ]] || { echo "bad sha256"; exit 1; }
+          [ -n "$IN_ID" ] || [ -z "$IN_VERSION" ] || { echo "a version needs a plugin id"; exit 1; }
+          [ -z "$IN_VERSION" ] || [[ "$IN_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "bad version"; exit 1; }
+          [[ "$IN_REF" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "app_ref must be a release tag like 1.2.1"; exit 1; }
+          [ -z "$IN_LIVE" ] || [[ "$IN_LIVE" =~ ^https://[A-Za-z0-9.-]+/$ ]] || { echo "bad live url"; exit 1; }
+          # Pin the tag to its commit so a moved tag can't swap the code mid-run.
+          SHA=$(git ls-remote https://github.com/HolyArrs/HolyArrs "refs/tags/$IN_REF^{}" | cut -f1)
+          [ -n "$SHA" ] || SHA=$(git ls-remote https://github.com/HolyArrs/HolyArrs "refs/tags/$IN_REF" | cut -f1)
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "tag $IN_REF not found"; exit 1; }
+          echo "app_sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Get this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: list
+          persist-credentials: false
+      - name: Get the HolyArrs source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: HolyArrs/HolyArrs
+          ref: ${{ steps.check.outputs.app_sha }}
+          path: holyarrs
+          persist-credentials: false
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: holyarrs/go.mod
+          cache: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Build the signing tool
+        env:
+          GOTOOLCHAIN: local
+          GOFLAGS: -mod=readonly
+        run: go build -C holyarrs -trimpath -o "$RUNNER_TEMP/pluginkey" ./app/backend/tools/pluginkey
+
+      - name: Write the signing key to a private temp file
+        env:
+          PLUGIN_SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
+        run: |
+          umask 077
+          mkdir -p "$RUNNER_TEMP/sk"
+          printf '%s\n' "$PLUGIN_SIGNING_KEY" > "$RUNNER_TEMP/sk/plugin-signing.key"
+
+      - name: Sign the blocklist
+        env:
+          PLUGIN_ID: ${{ inputs.id }}
+          PLUGIN_VERSION: ${{ inputs.version }}
+          PLUGIN_SHA: ${{ inputs.sha256 }}
+          REASON: ${{ inputs.reason }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          LIVE_URL: ${{ inputs.live_url }}
+        run: |
+          OUT="$RUNNER_TEMP/site"
+          bash list/.github/scripts/live.sh seed "$OUT"
+          bash list/.github/scripts/live.sh trust "$OUT" list/.github/state/lists.json
+          FLAGS=()
+          if [ -n "$PLUGIN_ID" ]; then FLAGS+=(--id "$PLUGIN_ID"); fi
+          if [ -n "$PLUGIN_VERSION" ]; then FLAGS+=(--version "$PLUGIN_VERSION"); fi
+          if [ -n "$PLUGIN_SHA" ]; then FLAGS+=(--sha256 "$PLUGIN_SHA"); fi
+          python3 holyarrs/deploy/release/plugins/publish.py block \
+            "${FLAGS[@]}" --reason "$REASON" \
+            --pluginkey "$RUNNER_TEMP/pluginkey" \
+            --key "$RUNNER_TEMP/sk/plugin-signing.key" \
+            --wiring "$(f=holyarrs/app/backend/internal/plugins/keys.go; [ -f "$f" ] || f=holyarrs/app/backend/cmd/holyarrs/plugins_wiring.go; echo "$f")" \
+            --live-url "$LIVE_URL" \
+            --out "$OUT"
+
+      - name: Remove the signing key
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/sk/plugin-signing.key" ]; then shred -u "$RUNNER_TEMP/sk/plugin-signing.key"; fi
+          rm -rf "$RUNNER_TEMP/sk"
+
+      - name: Upload to R2
+        if: ${{ !inputs.dry_run }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: bash list/.github/scripts/live.sh upload "$RUNNER_TEMP/site"
+
+      - name: Check the live site
+        if: ${{ !inputs.dry_run }}
+        run: |
+          bash list/.github/scripts/live.sh check "$RUNNER_TEMP/site"
+          for f in plugins.json blocklist.json; do
+            "$RUNNER_TEMP/pluginkey" verify -pub holyarrs/deploy/release/plugins/keys/main.pub -in "$RUNNER_TEMP/site/$f"
+          done
+
+      - name: Record the signed state
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash list/.github/scripts/live.sh record "$RUNNER_TEMP/site" list/.github/state/lists.json
+          cd list
+          # The README shows only plugins on the live list, so redraw it from the new record.
+          curl -fsS "https://plugins.holyarrs.com/stats.json" -o "$RUNNER_TEMP/stats.json" || echo "{}" > "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/gallery.py --stats "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/readme_list.py
+          git add .github/state/lists.json README.md docs/assets/plugins-*.svg
+          if git diff --cached --quiet; then echo "record unchanged"; exit 0; fi
+          git -c user.name=CoderLuii -c user.email=ship@coderluii.dev commit -m "Record signed lists"
+          # Other pushes may land during the run; put the record on top of them.
+          git -c user.name=CoderLuii -c user.email=ship@coderluii.dev pull --rebase "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+
+  # Remove files (remove_keys): deletes old version files under plugins/,
+  # source/ and images/ only; the signed lists are never touched here.
+  remove:
+    if: github.ref == 'refs/heads/main' && inputs.remove_keys != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The R2 keys live in this environment (main only).
+    environment:
+      name: plugin-signing
+      deployment: false   # keep the key protected, no public deployment record
+    permissions:
+      contents: read
+    steps:
+      - name: Check the keys
+        env:
+          IN_KEYS: ${{ inputs.remove_keys }}
+        run: |
+          n=0
+          for k in $IN_KEYS; do
+            [[ "$k" =~ ^(plugins|source|images)/[A-Za-z0-9._/-]{1,200}$ ]] || { echo "not a removable key: $k"; exit 1; }
+            case "/$k/" in */./*|*/../*|*//*) echo "bad key: $k"; exit 1 ;; esac
+            n=$((n+1))
+          done
+          [ "$n" -ge 1 ] && [ "$n" -le 50 ] || { echo "give 1 to 50 keys"; exit 1; }
+          printf '%s\n' $IN_KEYS > "$RUNNER_TEMP/keys.txt"
+
+      - name: Refuse files a live list still names
+        run: |
+          L="$RUNNER_TEMP/live"; mkdir -p "$L"
+          for f in plugins.json plugins-linux-arm64.json plugins-linux-arm-v7.json; do
+            code=$(curl -sS -H 'Cache-Control: no-cache' -o "$L/$f" -w '%{http_code}' "https://plugins.holyarrs.com/$f?r=$RANDOM") || code=000
+            case "$code" in 200) ;; 404) rm -f "$L/$f" ;; *) echo "fetching $f: HTTP $code"; exit 1 ;; esac
+          done
+          python3 - "$L" "$RUNNER_TEMP/keys.txt" <<'PY'
+          import base64, json, os, sys
+          d, keys = sys.argv[1], open(sys.argv[2]).read().split()
+          used = []
+          for n in os.listdir(d):
+              p = json.loads(base64.b64decode(json.loads(open(os.path.join(d, n), "rb").read())["payload"]))
+              for e in p.get("entries") or []:
+                  used.append(f"plugins/{e['id']}/{e['version']}/")
+                  used.append(f"source/{e['id']}/{e['version']}.tar.xz")
+                  used.append(f"images/{e['id']}/")
+          bad = [k for k in keys if any(k.startswith(u) for u in used)]
+          if bad:
+              sys.exit("still named by a live list: " + " ".join(bad))
+          print(f"{len(keys)} key(s) are not named by any live list")
+          PY
+
+      - name: Delete
+        if: ${{ !inputs.dry_run }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          EP="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          while read -r k; do
+            aws s3api delete-object --endpoint-url "$EP" --bucket holyarrs-plugins --key "$k" >/dev/null
+            echo "deleted $k"
+          done < "$RUNNER_TEMP/keys.txt"
+
+      - name: Check they are gone
+        if: ${{ !inputs.dry_run }}
+        run: |
+          sleep 30
+          while read -r k; do
+            code=$(curl -sS -H 'Cache-Control: no-cache' -o /dev/null -w '%{http_code}' "https://plugins.holyarrs.com/$k?r=$RANDOM") || code=000
+            echo "$k: HTTP $code"
+            [ "$code" = 404 ] || echo "::warning::$k still answers $code (cache?)"
+          done < "$RUNNER_TEMP/keys.txt"

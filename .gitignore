@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+# Signing keys never belong here.
+*.key
+*.pem
+*.priv
+
+# Local builds of our plugins.
+*.exe

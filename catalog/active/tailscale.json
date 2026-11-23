@@ -1,0 +1,14 @@
+{
+  "id": "tailscale",
+  "name": "Tailscale",
+  "description": "Reach HolyArrs from anywhere through your own Tailscale network, without opening ports. Sign-in is still required for every visit.",
+  "authors": [
+    "CoderLuii"
+  ],
+  "repo": "https://github.com/HolyArrs/HolyArrs-Plugins",
+  "path": "plugins/tailscale",
+  "tag": "tailscale-v1.0.0",
+  "version": "1.0.0",
+  "commit": "7d94653f076b77540f4bf47efea62deaf0941ce6",
+  "min_app_version": "1.3.0"
+}

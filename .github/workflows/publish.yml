@@ -1,0 +1,491 @@
+# Builds one plugin version, adds it to the signed plugin list, and uploads it
+# to plugins.holyarrs.com (R2 bucket holyarrs-plugins).
+# The source is the entry file catalog/active/<id>.json: the repo at its exact
+# commit (the tag must point there). That is an author's own repo, or this repo
+# for our own plugins (plugins/<id>, tagged <id>-v<version>).
+# The source archive is made from that same commit.
+#
+# Two jobs, so author code never shares a runner with a secret:
+#   build  no environment, no secrets, read-only token. Checks the author's tree,
+#          builds the three targets, copies the pictures, makes the source
+#          archive and hashes every file.
+#   sign   holds the key. Never checks out or runs author code: it checks every
+#          hash, then signs the build job's files and uploads them.
+name: HolyArrs Plugins - Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: Plugin id (for example tailscale), or language-packs to sign and upload the language packs
+        required: true
+      version:
+        description: Version to publish (for example 1.0.0)
+        required: true
+      dry_run:
+        description: Build, sign and check only. Nothing is uploaded
+        type: boolean
+        default: true
+      app_ref:
+        description: HolyArrs release tag for the signing tool and publish script, for example 1.2.1
+        default: ""
+      replace_unreleased:
+        description: Language packs only. Re-sign every pack of this app version (for example 1.3.0), allowed only while HolyArrs hasn't released it
+        default: ""
+      live_url:
+        description: Live site to compare against. Empty skips that check (only before the site is up)
+        default: https://plugins.holyarrs.com/
+
+permissions:
+  contents: read
+
+# One list change at a time, so two runs never sign the same counter.
+concurrency:
+  group: plugin-lists
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main' && inputs.id != 'language-packs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # No environment and no secrets: this job runs the author's build.
+    permissions:
+      contents: read
+    outputs:
+      app_sha: ${{ steps.check.outputs.app_sha }}
+      sums: ${{ steps.pack.outputs.sums }}
+    steps:
+      - name: Get this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: list
+          persist-credentials: false
+
+      - name: Check the inputs
+        id: check
+        env:
+          IN_ID: ${{ inputs.id }}
+          IN_VERSION: ${{ inputs.version }}
+          IN_REF: ${{ inputs.app_ref }}
+          IN_LIVE: ${{ inputs.live_url }}
+        run: |
+          [[ "$IN_ID" =~ ^[a-z0-9][a-z0-9-]{0,63}$ ]] || { echo "bad plugin id"; exit 1; }
+          [[ "$IN_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "bad version"; exit 1; }
+          [[ "$IN_REF" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "app_ref must be a release tag like 1.2.1"; exit 1; }
+          [ -z "$IN_LIVE" ] || [[ "$IN_LIVE" =~ ^https://[A-Za-z0-9.-]+/$ ]] || { echo "bad live url"; exit 1; }
+          # Pin the tag to its commit so a moved tag can't swap the code mid-run.
+          SHA=$(git ls-remote https://github.com/HolyArrs/HolyArrs "refs/tags/$IN_REF^{}" | cut -f1)
+          [ -n "$SHA" ] || SHA=$(git ls-remote https://github.com/HolyArrs/HolyArrs "refs/tags/$IN_REF" | cut -f1)
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "tag $IN_REF not found"; exit 1; }
+          echo "app_sha=$SHA" >> "$GITHUB_OUTPUT"
+          # The entry file names the source; check.py already passed on main.
+          ENTRY="list/catalog/active/$IN_ID.json"
+          [ -f "$ENTRY" ] || { echo "$ENTRY is missing; only listed plugins are published"; exit 1; }
+          python3 - "$ENTRY" "$IN_VERSION" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, re, sys
+          e = json.load(open(sys.argv[1]))
+          ver = sys.argv[2]
+          m = re.fullmatch(r"https://github\.com/([A-Za-z0-9-]+/[A-Za-z0-9._-]+?)(\.git)?", e["repo"])
+          path = e.get("path", "")
+          if not m or not re.fullmatch(r"[0-9a-f]{40}", e["commit"]) or not re.fullmatch(r"[A-Za-z0-9._/-]*", path) \
+                  or path.startswith("/") or any(p in (".", "..") for p in path.split("/")):
+              sys.exit("bad repo, commit or path in the entry file")
+          tv = e["tag"]
+          if tv.startswith(e["id"] + "-"):
+              tv = tv[len(e["id"]) + 1:]
+          if tv.removeprefix("v") != ver or e.get("version", ver) != ver:
+              sys.exit(f"version {ver} is not the entry's tag {e['tag']}")
+          print(f"repo={m.group(1)}")
+          print(f"commit={e['commit']}")
+          print(f"tag={e['tag']}")
+          print(f"path={path.strip('/')}")
+          PY
+      - name: Check the tag points at the entry's commit
+        env:
+          # Also reads tags in this private repo; public repos need no access.
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ steps.check.outputs.repo }}
+          TAG: ${{ steps.check.outputs.tag }}
+          COMMIT: ${{ steps.check.outputs.commit }}
+        run: |
+          [[ "$TAG" =~ ^[A-Za-z0-9._-]{1,80}$ ]] || { echo "bad tag"; exit 1; }
+          GOT=$(gh api "repos/$REPO/commits/refs/tags/$TAG" --jq .sha 2>/dev/null || true)
+          [ "$GOT" = "$COMMIT" ] || { echo "tag $TAG points at ${GOT:-nothing}, not the entry's $COMMIT"; exit 1; }
+      - name: Get the HolyArrs source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: HolyArrs/HolyArrs
+          ref: ${{ steps.check.outputs.app_sha }}
+          path: holyarrs
+          persist-credentials: false
+      - name: Get the plugin source at the entry's commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ steps.check.outputs.repo }}
+          ref: ${{ steps.check.outputs.commit }}
+          path: author
+          persist-credentials: false
+      - name: Pick the source folder and check its tree
+        id: src
+        env:
+          SUB: ${{ steps.check.outputs.path }}
+          COMMIT: ${{ steps.check.outputs.commit }}
+        run: |
+          ROOT=author; REL=$SUB; REV=$COMMIT; CHECK=$ROOT
+          [ "$(git -C author rev-parse HEAD)" = "$COMMIT" ] || { echo "checkout is not the entry's commit"; exit 1; }
+          DIR="$ROOT${REL:+/$REL}"
+          [ -d "$DIR" ] || { echo "$DIR is missing"; exit 1; }
+          # No links, hard links or special files anywhere the build can read.
+          bash list/.github/scripts/artifact.sh links "$CHECK"
+          REAL_ROOT=$(realpath -e "$ROOT")
+          REAL_DIR=$(realpath -e "$DIR")
+          case "$REAL_DIR/" in "$REAL_ROOT"/*) ;; *) echo "$DIR leaves the checkout"; exit 1 ;; esac
+          {
+            echo "dir=$DIR"
+            echo "root=$ROOT"
+            echo "rev=$REV"
+            echo "rel=$REL"
+          } >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: holyarrs/go.mod
+          cache: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the picture tools
+        run: |
+          sudo apt-get install -y --no-install-recommends libcairo2 >/dev/null
+          python3 -m pip install --disable-pip-version-check "pillow==11.3.0" "cairosvg==2.8.2" "jsonschema==4.23.0"
+
+      - name: Check the plugin folder (the same check contributors run)
+        env:
+          PLUGIN_ID: ${{ inputs.id }}
+          SRC: ${{ steps.src.outputs.dir }}
+        run: python3 list/.github/scripts/check.py "list/catalog/active/$PLUGIN_ID.json" --src "$SRC"
+
+      # The logo is copied to plugins.holyarrs.com so the app never loads it
+      # from an author's site. Developer pictures are fetched by the sign job.
+      - name: Copy the logo
+        env:
+          PLUGIN_ID: ${{ inputs.id }}
+          SRC: ${{ steps.src.outputs.dir }}
+        run: |
+          OUT="$RUNNER_TEMP/out/site"
+          mkdir -p "$OUT"
+          # icon_url (an https link to the logo) from the listing file, else
+          # from holyarrs-plugin.json; icon_file is a logo inside the source.
+          # One field per line: the link, then the file.
+          mapfile -t F < <(python3 - "list/catalog/active/$PLUGIN_ID.json" "$SRC/holyarrs-plugin.json" <<'PY'
+          import json, os, re, sys
+          listing = json.load(open(sys.argv[1])) if os.path.exists(sys.argv[1]) else {}
+          meta = json.load(open(sys.argv[2]))
+          url = str(listing.get("icon_url") or meta.get("icon_url") or "")
+          icon = str(meta.get("icon_file") or "")
+          if any(c in url + icon for c in "\r\n\0"):
+              sys.exit("icon_url or icon_file has a line break")
+          print(url)
+          print(icon)
+          PY
+          )
+          [ "${#F[@]}" -eq 2 ] || { echo "could not read the picture fields"; exit 1; }
+          URL=${F[0]}
+          FILE=${F[1]}
+          if [ -n "$URL" ]; then
+            python3 list/.github/scripts/images.py logo --id "$PLUGIN_ID" --url "$URL" --out "$OUT"
+          elif [ -n "$FILE" ]; then
+            python3 list/.github/scripts/images.py logo --id "$PLUGIN_ID" --file "$SRC/$FILE" --out "$OUT"
+          fi
+
+      - name: Build the three targets
+        env:
+          SRC: ${{ steps.src.outputs.dir }}
+          # The author's go.mod must not pull a different Go toolchain, change
+          # go.mod, or skip the checksum database.
+          GOTOOLCHAIN: local
+          GOFLAGS: -mod=readonly
+          CGO_ENABLED: "0"
+          GOPROXY: https://proxy.golang.org
+          GOSUMDB: sum.golang.org
+          GONOSUMDB: ""
+          GOPRIVATE: ""
+          GOINSECURE: ""
+        run: python3 holyarrs/deploy/release/plugins/publish.py build --src "$SRC" --out "$RUNNER_TEMP/out/bin"
+
+      - name: Pack the source archive, the plugin details and the hashes
+        id: pack
+        env:
+          PLUGIN_ID: ${{ inputs.id }}
+          PLUGIN_VERSION: ${{ inputs.version }}
+          SRC: ${{ steps.src.outputs.dir }}
+          ROOT: ${{ steps.src.outputs.root }}
+          REV: ${{ steps.src.outputs.rev }}
+          REL: ${{ steps.src.outputs.rel }}
+        run: |
+          OUT="$RUNNER_TEMP/out"
+          # From the commit itself, not the working tree.
+          mkdir -p "$OUT/source/$PLUGIN_ID"
+          git -C "$ROOT" archive --format=tar --prefix "$PLUGIN_ID-$PLUGIN_VERSION/" "$REV${REL:+:$REL}" \
+            | xz -9e > "$OUT/source/$PLUGIN_ID/$PLUGIN_VERSION.tar.xz"
+          # Only the data publish.py reads in the sign job: the details file,
+          # go.mod (for the version stamp) and the logo file.
+          mkdir -p "$OUT/meta"
+          cp -- "$SRC/holyarrs-plugin.json" "$SRC/go.mod" "$OUT/meta/"
+          ICON=$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1])).get("icon_file") or "")' "$SRC/holyarrs-plugin.json")
+          if [ -n "$ICON" ]; then
+            mkdir -p "$OUT/meta/$(dirname -- "$ICON")"
+            cp -- "$SRC/$ICON" "$OUT/meta/$ICON"
+          fi
+          bash list/.github/scripts/artifact.sh links "$OUT"
+          SUMS=$(bash list/.github/scripts/artifact.sh sums "$OUT")
+          echo "sums=$SUMS" >> "$GITHUB_OUTPUT"
+          cat "$OUT/SHA256SUMS"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: plugin-build
+          path: ${{ runner.temp }}/out
+          if-no-files-found: error
+          retention-days: 3
+
+  sign:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    # GitHub-hosted only: the key file must never land on a runner that is kept.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Settings > Environments > plugin-signing must allow only main and hold
+    # the key (it has no passphrase) as an environment secret, never a repo secret.
+    environment:
+      name: plugin-signing
+      deployment: false   # keep the key protected, no public deployment record
+    permissions:
+      # write: the run commits .github/state/lists.json after a successful upload.
+      contents: write
+    # Never checks out or runs author code; it only reads the build job's
+    # files after checking every hash.
+    steps:
+      - name: Get this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: list
+          persist-credentials: false
+      - name: Get the HolyArrs source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: HolyArrs/HolyArrs
+          ref: ${{ needs.build.outputs.app_sha }}
+          path: holyarrs
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plugin-build
+          path: ${{ runner.temp }}/in
+      - name: Check every hash from the build job
+        env:
+          SUMS: ${{ needs.build.outputs.sums }}
+          PLUGIN_ID: ${{ inputs.id }}
+          PLUGIN_VERSION: ${{ inputs.version }}
+        run: |
+          IN="$RUNNER_TEMP/in"
+          bash list/.github/scripts/artifact.sh verify "$IN" "$SUMS"
+          bash list/.github/scripts/artifact.sh paths "$IN" "$PLUGIN_ID" "$PLUGIN_VERSION"
+          # Developer pictures come only from the reviewed listing's authors, never from the build.
+          python3 - "list/catalog/active/$PLUGIN_ID.json" > "$RUNNER_TEMP/devs.txt" <<'PY'
+          import json, re, sys
+          for d in dict.fromkeys(str(x) for x in (json.load(open(sys.argv[1])).get("authors") or [])):
+              if re.fullmatch(r"[A-Za-z0-9-]{1,39}", d):
+                  print(d)
+          PY
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: holyarrs/go.mod
+          cache: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the picture tools
+        run: python3 -m pip install --disable-pip-version-check "pillow==11.3.0"
+
+      - name: Build the signing tool
+        env:
+          GOTOOLCHAIN: local
+          GOFLAGS: -mod=readonly
+        run: go build -C holyarrs -trimpath -o "$RUNNER_TEMP/pluginkey" ./app/backend/tools/pluginkey
+
+      - name: Write the signing key to a private temp file
+        env:
+          PLUGIN_SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
+        run: |
+          umask 077
+          mkdir -p "$RUNNER_TEMP/sk"
+          printf '%s\n' "$PLUGIN_SIGNING_KEY" > "$RUNNER_TEMP/sk/plugin-signing.key"
+
+      - name: Sign and check
+        env:
+          PLUGIN_ID: ${{ inputs.id }}
+          PLUGIN_VERSION: ${{ inputs.version }}
+          LIVE_URL: ${{ inputs.live_url }}
+        run: |
+          IN="$RUNNER_TEMP/in"
+          OUT="$RUNNER_TEMP/site"
+          mkdir -p "$OUT"
+          # Only this plugin's logo comes from the build job.
+          for f in "images/$PLUGIN_ID/icon-128.webp" "images/$PLUGIN_ID/icon-256.webp"; do
+            if [ -f "$IN/site/$f" ]; then install -D -m 644 -- "$IN/site/$f" "$OUT/$f"; fi
+          done
+          # Developer pictures straight from github.com for the listing's authors.
+          mapfile -t DEVS < "$RUNNER_TEMP/devs.txt"
+          if [ "${#DEVS[@]}" -gt 0 ]; then
+            python3 list/.github/scripts/images.py avatars --out "$OUT" "${DEVS[@]}" || echo "developer pictures skipped; the app shows letters"
+          fi
+          bash list/.github/scripts/live.sh seed "$OUT"
+          bash list/.github/scripts/live.sh trust "$OUT" list/.github/state/lists.json
+          # publish.py calls "go build"; here that only copies the checked files.
+          mkdir -p "$RUNNER_TEMP/shim"
+          install -m 755 list/.github/scripts/goshim.sh "$RUNNER_TEMP/shim/go"
+          PATH="$RUNNER_TEMP/shim:$PATH" PREBUILT="$IN/bin" python3 holyarrs/deploy/release/plugins/publish.py publish \
+            --id "$PLUGIN_ID" --version "$PLUGIN_VERSION" \
+            --src "$IN/meta" \
+            --pluginkey "$RUNNER_TEMP/pluginkey" \
+            --key "$RUNNER_TEMP/sk/plugin-signing.key" \
+            --wiring "$(f=holyarrs/app/backend/internal/plugins/keys.go; [ -f "$f" ] || f=holyarrs/app/backend/cmd/holyarrs/plugins_wiring.go; echo "$f")" \
+            --live-url "$LIVE_URL" \
+            --out "$OUT"
+          # The source archive the build job made from the commit.
+          mkdir -p "$OUT/source/$PLUGIN_ID"
+          cp -- "$IN/source/$PLUGIN_ID/$PLUGIN_VERSION.tar.xz" "$OUT/source/$PLUGIN_ID/$PLUGIN_VERSION.tar.xz"
+
+      - name: Remove the signing key
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/sk/plugin-signing.key" ]; then shred -u "$RUNNER_TEMP/sk/plugin-signing.key"; fi
+          rm -rf "$RUNNER_TEMP/sk"
+
+      - name: Upload to plugins.holyarrs.com
+        if: ${{ !inputs.dry_run }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: bash list/.github/scripts/live.sh upload "$RUNNER_TEMP/site"
+
+      - name: Check the live site
+        if: ${{ !inputs.dry_run }}
+        run: |
+          bash list/.github/scripts/live.sh check "$RUNNER_TEMP/site"
+          for f in plugins.json blocklist.json; do
+            "$RUNNER_TEMP/pluginkey" verify -pub holyarrs/deploy/release/plugins/keys/main.pub -in "$RUNNER_TEMP/site/$f"
+          done
+
+      - name: Record the signed state
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash list/.github/scripts/live.sh record "$RUNNER_TEMP/site" list/.github/state/lists.json
+          cd list
+          # The README shows only plugins on the live list, so redraw it from the new record.
+          curl -fsS "https://plugins.holyarrs.com/stats.json" -o "$RUNNER_TEMP/stats.json" || echo "{}" > "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/gallery.py --stats "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/readme_list.py
+          git add .github/state/lists.json README.md docs/assets/plugins-*.svg
+          if git diff --cached --quiet; then echo "record unchanged"; exit 0; fi
+          git -c user.name=CoderLuii -c user.email=ship@coderluii.dev commit -m "Record signed lists"
+          # Other pushes may land during the run; put the record on top of them.
+          git -c user.name=CoderLuii -c user.email=ship@coderluii.dev pull --rebase "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+
+  # Language packs (id: language-packs): languages.py packs and signs on its own;
+  # no author build and no app_ref. The readable files are plugins/language-packs/.
+  language-packs:
+    if: github.ref == 'refs/heads/main' && inputs.id == 'language-packs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: plugin-signing
+      deployment: false   # keep the key protected, no public deployment record
+    permissions:
+      # write: the run commits .github/state/lists.json after a successful upload.
+      contents: write
+    steps:
+      - name: Check the inputs
+        env:
+          IN_LIVE: ${{ inputs.live_url }}
+        run: '[ -z "$IN_LIVE" ] || [[ "$IN_LIVE" =~ ^https://[A-Za-z0-9.-]+/$ ]] || { echo "bad live url"; exit 1; }'
+      - name: Get this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: list
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the signing library
+        run: python3 -m pip install --disable-pip-version-check "cryptography==44.0.2"
+      - name: Check the language files and their index
+        run: |
+          python3 list/.github/scripts/languages.py check
+          python3 list/.github/scripts/languages_test.py
+
+      - name: Write the signing key to a private temp file
+        env:
+          PLUGIN_SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
+        run: |
+          umask 077
+          mkdir -p "$RUNNER_TEMP/sk"
+          printf '%s\n' "$PLUGIN_SIGNING_KEY" > "$RUNNER_TEMP/sk/plugin-signing.key"
+
+      - name: Pack, sign and check
+        env:
+          LIVE_URL: ${{ inputs.live_url }}
+          REPLACE: ${{ inputs.replace_unreleased }}
+        run: |
+          OUT="$RUNNER_TEMP/site"
+          bash list/.github/scripts/live.sh seed "$OUT"
+          bash list/.github/scripts/live.sh trust "$OUT" list/.github/state/lists.json
+          python3 list/.github/scripts/languages.py sign \
+            --key "$RUNNER_TEMP/sk/plugin-signing.key" \
+            --live-url "$LIVE_URL" \
+            --replace-unreleased "$REPLACE" \
+            --out "$OUT"
+          find "$OUT/languages" -type f | sort
+
+      - name: Remove the signing key
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/sk/plugin-signing.key" ]; then shred -u "$RUNNER_TEMP/sk/plugin-signing.key"; fi
+          rm -rf "$RUNNER_TEMP/sk"
+
+      - name: Upload to plugins.holyarrs.com
+        if: ${{ !inputs.dry_run }}
+        env:
+          REPLACE_UNRELEASED: ${{ inputs.replace_unreleased }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: bash list/.github/scripts/live.sh upload "$RUNNER_TEMP/site"
+
+      - name: Check the live site
+        if: ${{ !inputs.dry_run }}
+        run: bash list/.github/scripts/live.sh check "$RUNNER_TEMP/site"
+
+      - name: Record the signed state
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash list/.github/scripts/live.sh record "$RUNNER_TEMP/site" list/.github/state/lists.json
+          cd list
+          # The README shows Language packs only once a released version is live, so redraw it from the new record.
+          curl -fsS "https://plugins.holyarrs.com/stats.json" -o "$RUNNER_TEMP/stats.json" || echo "{}" > "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/gallery.py --stats "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/readme_list.py
+          git add .github/state/lists.json README.md docs/assets/plugins-*.svg
+          if git diff --cached --quiet; then echo "record unchanged"; exit 0; fi
+          git -c user.name=CoderLuii -c user.email=ship@coderluii.dev commit -m "Record signed lists"
+          git -c user.name=CoderLuii -c user.email=ship@coderluii.dev pull --rebase "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main

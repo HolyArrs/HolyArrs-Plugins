@@ -1,0 +1,34 @@
+{
+  "blocklist.json": {
+    "counter": 4,
+    "sha256": "99b1678b612039b9651625fe317d535ee2881e51defafa42e0b06ef7219f0b1b"
+  },
+  "languages.json": {
+    "counter": 15,
+    "released": [
+      "1.3.0"
+    ],
+    "sha256": "c2b513a04519bba7137cceff60df5faf2f194d496b26cca10afa592728abaed4"
+  },
+  "plugins-linux-arm-v7.json": {
+    "counter": 6,
+    "ids": [
+      "tailscale"
+    ],
+    "sha256": "dcea17709bccd6302ba623c871a15b764468042061709677b5f1c41ca3c48c07"
+  },
+  "plugins-linux-arm64.json": {
+    "counter": 6,
+    "ids": [
+      "tailscale"
+    ],
+    "sha256": "658f8d927a38d5202ca030087d35e4bd42d5ef0b3ceec4a5792bad6d637f404b"
+  },
+  "plugins.json": {
+    "counter": 6,
+    "ids": [
+      "tailscale"
+    ],
+    "sha256": "8973f36c6a63056c48c877e8283cfe6e8c7580ef92211e4a11ceb0f6aa994240"
+  }
+}
