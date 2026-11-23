@@ -1,0 +1,10 @@
+{
+  "id": "example-plugin",
+  "name": "Example Plugin",
+  "description": "Replace this line with what your plugin does.",
+  "authors": ["your-github-name"],
+  "repo": "https://github.com/your-github-name/holyarrs-example-plugin",
+  "tag": "0.0.0",
+  "commit": "0000000000000000000000000000000000000000",
+  "min_app_version": "1.2.1"
+}

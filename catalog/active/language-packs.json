@@ -1,0 +1,317 @@
+{
+  "id": "language-packs",
+  "name": "Language Packs",
+  "description": "Shows HolyArrs in your language. Install the languages you want; English is always there.",
+  "authors": [
+    "CoderLuii"
+  ],
+  "repo": "https://github.com/HolyArrs/HolyArrs-Plugins",
+  "path": "plugins/language-packs",
+  "version": "1.0.0",
+  "min_app_version": "1.3.0",
+  "app": "1.3.0-test.12",
+  "fit": "5252ca336890",
+  "languages": [
+    {
+      "code": "ar",
+      "file": "plugins/language-packs/ar.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "c55fb155686a30e42b7f0bf3f44ae9476d8d11142c92c7e84756c8bda3d981be"
+    },
+    {
+      "code": "bg",
+      "file": "plugins/language-packs/bg.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "cbaf721ec319b4f5d013cbb67f0b77b4b26cffc51170efe84da413f4a658d37f"
+    },
+    {
+      "code": "bn",
+      "file": "plugins/language-packs/bn.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "f9226948b3e9da1d463fedb04db478fc228b766b1873999f34fe5345f8aed33b"
+    },
+    {
+      "code": "ca",
+      "file": "plugins/language-packs/ca.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "805e8b91f027b77c50858dc06a673437d4872e46aba3c6b32a5d3386ed09c374"
+    },
+    {
+      "code": "cs",
+      "file": "plugins/language-packs/cs.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "9cd1514c04ad2d8d4c9ef9f47ddf244559bc6f1ad0de2adaf3a99c31063dc50f"
+    },
+    {
+      "code": "da",
+      "file": "plugins/language-packs/da.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "f1e55895dc52e767c35a56420b24e320d914d42b412ed1124ce61f509853cf6b"
+    },
+    {
+      "code": "de",
+      "file": "plugins/language-packs/de.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "bc1c6dbcf29d2a3c46e852b5e4dae1a2c622180b3ad90a6d733287a928765f40"
+    },
+    {
+      "code": "el",
+      "file": "plugins/language-packs/el.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "f7ff593b65abf2c1db9e013f83381bd9fccedbcb516d3769b955ac7f552dd9c8"
+    },
+    {
+      "code": "es",
+      "file": "plugins/language-packs/es.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "06cb76cd188a7ef28d07131d990c24ac26da6686075d0cb22555659a01ca5730"
+    },
+    {
+      "code": "et",
+      "file": "plugins/language-packs/et.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "e735de260dffab7a4c84db679e4778ddcef8d815d28a499d690c4b837c54b07f"
+    },
+    {
+      "code": "fa",
+      "file": "plugins/language-packs/fa.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "9dc6a697cc3a17d9817915a8c48b1c89767a5f37e819cd6827fb233d75b97f61"
+    },
+    {
+      "code": "fi",
+      "file": "plugins/language-packs/fi.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "8b4cdb3a95f2d2d6e4c12752350c6ed2efe228c8dcbf2e6cf8ffa66b8e62259c"
+    },
+    {
+      "code": "fil",
+      "file": "plugins/language-packs/fil.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "895668b6aba4ba02063d0f2e13821f93d5ac74ef45aa07c8fabba1e9fb43b942"
+    },
+    {
+      "code": "fr",
+      "file": "plugins/language-packs/fr.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "0a98897258d0f4cc296d2d1f165f540a4148dbbd16751694f16c5b65f0ad332b"
+    },
+    {
+      "code": "he",
+      "file": "plugins/language-packs/he.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "0003436a5a33b5dc2a6e1f2b8576dc08014b4cee0bd00b021c32bca2bd60d8f3"
+    },
+    {
+      "code": "hi",
+      "file": "plugins/language-packs/hi.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "c4b22ab6b8603e32c05cbf5af8642a3136475a95353cd1ba66bbd8d5508877bb"
+    },
+    {
+      "code": "hr",
+      "file": "plugins/language-packs/hr.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "6b4fa4cb3d86ec9e6db862c0e1827620339b8c24c529f9ae103646ec083ae9f8"
+    },
+    {
+      "code": "hu",
+      "file": "plugins/language-packs/hu.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "ec2060cade1e3015d05e0873b0f3eabcd5568477570ad689934b214c127e44a5"
+    },
+    {
+      "code": "id",
+      "file": "plugins/language-packs/id.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "6d0d8dcabbd87fa032713c51467503fe7502825c4485c568d961110ba96de339"
+    },
+    {
+      "code": "is",
+      "file": "plugins/language-packs/is.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "fc640a6ba8276e92bf4c314b6cd96f65c22a8185a12b7e5aed2a650709ab8263"
+    },
+    {
+      "code": "it",
+      "file": "plugins/language-packs/it.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "fcda06d88d7fd33662e842dc15b731cac1c781568c7368152b1940f5f7e7e4e3"
+    },
+    {
+      "code": "ja",
+      "file": "plugins/language-packs/ja.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "96403c8b0dfb1d10c6edbdee1db08d3359e15e644fe13ab390a38986dcc533c1"
+    },
+    {
+      "code": "ko",
+      "file": "plugins/language-packs/ko.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "d73fea48476180f099008a5a44a5a846ceab35d1e278a20e9f5a49639dac9ce0"
+    },
+    {
+      "code": "lt",
+      "file": "plugins/language-packs/lt.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "34d336cb81fad7343af6c23a7a4cc7025a36007eda1f8fa2bdafd5adeb8b2913"
+    },
+    {
+      "code": "lv",
+      "file": "plugins/language-packs/lv.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "2322bf87424442555b145521e69faee0971ae6aecc0c0f2bae93e73f7b507ff1"
+    },
+    {
+      "code": "ms",
+      "file": "plugins/language-packs/ms.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "fe0d486026d95a76900b819d5c26e602750230b461ba4f75368826ae80067b1f"
+    },
+    {
+      "code": "nb",
+      "file": "plugins/language-packs/nb.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "65f52a97244657f674e860d801d4e72dfae4bea10e2db6e5d55356eac46932f8"
+    },
+    {
+      "code": "nl",
+      "file": "plugins/language-packs/nl.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "385b7590c73cdf0610a9eeb89489d7822ce2f699ee99ef3fa1116057c57074db"
+    },
+    {
+      "code": "pl",
+      "file": "plugins/language-packs/pl.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "ad10d0e025733899da63f8ab5b5ef20157107eeb249002d679af8560d85b74e7"
+    },
+    {
+      "code": "pt-br",
+      "file": "plugins/language-packs/pt-br.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "86a877ae1e5631e5c0319f28eee3c170f50875d73e077cd7944253fa3671d33f"
+    },
+    {
+      "code": "pt-pt",
+      "file": "plugins/language-packs/pt-pt.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "b6ee2f1d206381622e49fb810c1ecc37d6b2a966c9a203ae2e89399c35f33d35"
+    },
+    {
+      "code": "ro",
+      "file": "plugins/language-packs/ro.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "0eba99ce883d5c856d40372567811dad18a745e7101d8129eb04dcd2cf202d89"
+    },
+    {
+      "code": "ru",
+      "file": "plugins/language-packs/ru.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "00a3123606bfc220eed5aeccd369a7488ee357cb31b9409b6f985e1b0d630a92"
+    },
+    {
+      "code": "sk",
+      "file": "plugins/language-packs/sk.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "510b32bf798ae1928bb394dbf7f976e8beab3201684657b619c9587aa5195f2a"
+    },
+    {
+      "code": "sr",
+      "file": "plugins/language-packs/sr.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "143d08b82ee982801a7b42c58e4847f7badc669ec8e4e7e35a73cdfdea3e9b4d"
+    },
+    {
+      "code": "sv",
+      "file": "plugins/language-packs/sv.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "abb2a16b2ba26a7db3fc156936ef513b027cae2eb321bf18b53f6f8facb2fb36"
+    },
+    {
+      "code": "ta",
+      "file": "plugins/language-packs/ta.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "a219abb02939fc93384a42ab57e6fd39b9f3fa0d7d8a51ef911fda3cd27af069"
+    },
+    {
+      "code": "th",
+      "file": "plugins/language-packs/th.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "2e633007900467d6cdd206f74ea1a3208bae1cb0fa7f621da07eadd399f8736b"
+    },
+    {
+      "code": "tr",
+      "file": "plugins/language-packs/tr.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "77cd74cbe4b2e15b27da9415327787865bce0a3ec6aefcba8e9249c98f64ca40"
+    },
+    {
+      "code": "uk",
+      "file": "plugins/language-packs/uk.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "d6f5b1d8e1223db2cb0c9c7388af34652f32cb57688916ad598efaac8c5eceb8"
+    },
+    {
+      "code": "vi",
+      "file": "plugins/language-packs/vi.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "b30c75e8c447db71b97048a834c0e2e26e018f70fbd2b2f1f4590e5931b3a3d3"
+    },
+    {
+      "code": "zh-cn",
+      "file": "plugins/language-packs/zh-cn.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "7a9ddced0410498bec60054dccd2df26c298a71a3ce3803a99805db195f083d6"
+    },
+    {
+      "code": "zh-tw",
+      "file": "plugins/language-packs/zh-tw.json",
+      "lines": 12123,
+      "translated": 12123,
+      "sha256": "a00b2a651efa42b7282883e280f63c30f0d104f9cb7e75adde602fa64fbe2c6b"
+    }
+  ]
+}

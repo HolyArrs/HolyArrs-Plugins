@@ -1,0 +1,55 @@
+# Builds and tests each plugin we make ourselves (one folder per plugin under
+# plugins/) when anything there changes. Nothing is signed or uploaded here.
+name: HolyArrs Plugins - Test our plugins
+
+on:
+  pull_request:
+    paths: ["plugins/**", ".github/workflows/test-plugins.yml"]
+  push:
+    branches: [main]
+    paths: ["plugins/**", ".github/workflows/test-plugins.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      folders: ${{ steps.find.outputs.folders }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: find
+        run: |
+          echo "folders=$(find plugins -mindepth 2 -maxdepth 2 -name go.mod -printf '%h\n' | sort | jq -Rcs 'split("\n") | map(select(length > 0))')" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: list
+    if: needs.list.outputs.folders != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: ${{ fromJSON(needs.list.outputs.folders) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: ${{ matrix.folder }}/go.mod
+          cache-dependency-path: ${{ matrix.folder }}/go.sum
+      - name: Build
+        working-directory: ${{ matrix.folder }}
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          go vet ./...
+          go build ./...
+      - name: Test
+        working-directory: ${{ matrix.folder }}
+        run: go test ./...

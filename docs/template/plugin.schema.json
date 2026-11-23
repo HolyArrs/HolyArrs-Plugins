@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/HolyArrs/HolyArrs-Plugins/blob/main/docs/template/plugin.schema.json",
+  "title": "HolyArrs plugin entry",
+  "description": "One file per plugin in catalog/active/ or catalog/inactive/. The file name is the id plus .json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "description", "authors", "repo", "tag", "commit"],
+  "properties": {
+    "id": {
+      "description": "Lowercase letters, digits and dashes, up to 64 characters. Matches the file name.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+    },
+    "name": { "description": "Shown on the Plugins page, 2 to 40 characters (the same limit as in holyarrs-plugin.json).", "type": "string", "minLength": 2, "maxLength": 40 },
+    "description": { "description": "One short line, 10 to 160 characters.", "type": "string", "minLength": 10, "maxLength": 160 },
+    "authors": {
+      "description": "GitHub user names of the people who made it.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,38}$" }
+    },
+    "repo": {
+      "description": "Public GitHub repo with the plugin source.",
+      "type": "string",
+      "pattern": "^https://github\\.com/[A-Za-z0-9-]+/[A-Za-z0-9._-]+$"
+    },
+    "path": {
+      "description": "Folder inside the repo that holds the plugin, when it is not the repo root.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*$"
+    },
+    "tag": { "description": "Release tag the version is built from, like 1.0.0. That is the published version (a leading v is also accepted and dropped). A repo holding several plugins can tag <id>-v1.0.0.", "type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[A-Za-z0-9._-]+$" },
+    "commit": {
+      "description": "Full 40-character commit the tag points to. Later changes by the author are not picked up until this changes.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "icon_url": {
+      "description": "Optional direct https link to your logo (PNG, JPEG, WebP or SVG, 16 to 4096 px a side, up to 2 MB; square at 256 x 256 or larger looks best). We copy it to plugins.holyarrs.com; the app never loads it from your link.",
+      "type": "string",
+      "maxLength": 500,
+      "pattern": "^https://[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+$"
+    },
+    "version": {
+      "description": "Optional. The plugin version, like 1.0.0; when given it must match the tag's version.",
+      "type": "string",
+      "pattern": "^[0-9]+[.][0-9]+[.][0-9]+$"
+    },
+    "min_app_version": {
+      "description": "Oldest HolyArrs that may install it. 1.2.1 or newer.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    }
+  }
+}

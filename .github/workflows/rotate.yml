@@ -1,0 +1,87 @@
+# One time: re-signs the live plugin lists and blocklist with the signing key
+# held in plugin-signing (the key the app pins), counters one above the live
+# ones. Refuses unless every live list is empty, so nothing is ever dropped.
+name: HolyArrs Plugins - Rotate key
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Sign and check only. Nothing is uploaded
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plugin-lists
+  cancel-in-progress: false
+
+jobs:
+  rotate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: plugin-signing
+    permissions:
+      contents: write
+    steps:
+      - name: Get this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: list
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the signing library
+        run: python3 -m pip install --disable-pip-version-check "cryptography==44.0.2"
+
+      - name: Write the signing key to a private temp file
+        env:
+          PLUGIN_SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
+        run: |
+          umask 077
+          mkdir -p "$RUNNER_TEMP/sk"
+          printf '%s\n' "$PLUGIN_SIGNING_KEY" > "$RUNNER_TEMP/sk/plugin-signing.key"
+
+      - name: Re-sign the empty lists
+        run: |
+          OUT="$RUNNER_TEMP/site"
+          bash list/.github/scripts/live.sh seed "$OUT"
+          bash list/.github/scripts/live.sh trust "$OUT" list/.github/state/lists.json
+          python3 list/.github/scripts/languages.py rotate --key "$RUNNER_TEMP/sk/plugin-signing.key" --out "$OUT"
+          rm -f "$OUT/block-reasons.txt"
+
+      - name: Remove the signing key
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/sk/plugin-signing.key" ]; then shred -u "$RUNNER_TEMP/sk/plugin-signing.key"; fi
+          rm -rf "$RUNNER_TEMP/sk"
+
+      - name: Upload to plugins.holyarrs.com
+        if: ${{ !inputs.dry_run }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: bash list/.github/scripts/live.sh upload "$RUNNER_TEMP/site"
+
+      - name: Check the live site
+        if: ${{ !inputs.dry_run }}
+        run: bash list/.github/scripts/live.sh check "$RUNNER_TEMP/site"
+
+      - name: Record the signed state
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash list/.github/scripts/live.sh record "$RUNNER_TEMP/site" list/.github/state/lists.json
+          cd list
+          git add .github/state/lists.json
+          if git diff --cached --quiet; then echo "record unchanged"; exit 0; fi
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -m "Record signed lists after $GITHUB_WORKFLOW run $GITHUB_RUN_ID"
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com pull --rebase "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main

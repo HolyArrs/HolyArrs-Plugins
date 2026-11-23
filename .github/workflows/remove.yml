@@ -1,0 +1,94 @@
+# Deletes plugin version files from plugins.holyarrs.com (R2 bucket
+# holyarrs-plugins): files under plugins/, source/ and images/ only. The signed
+# lists are never touched here, and a file that a live list still names is
+# refused, so a listed plugin keeps working. To stop a version, block it first.
+name: HolyArrs Plugins - Remove files
+
+on:
+  workflow_dispatch:
+    inputs:
+      keys:
+        description: Object keys to delete, separated by spaces (for example plugins/x/1.0.0/manifest.json)
+        required: true
+      dry_run:
+        description: Check only. Nothing is deleted
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Never at the same time as a list change.
+concurrency:
+  group: plugin-lists
+  cancel-in-progress: false
+
+jobs:
+  remove:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The R2 keys live in this environment (main only).
+    environment: plugin-signing
+    permissions:
+      contents: read
+    steps:
+      - name: Check the keys
+        env:
+          IN_KEYS: ${{ inputs.keys }}
+        run: |
+          n=0
+          for k in $IN_KEYS; do
+            [[ "$k" =~ ^(plugins|source|images)/[A-Za-z0-9._/-]{1,200}$ ]] || { echo "not a removable key: $k"; exit 1; }
+            case "/$k/" in */./*|*/../*|*//*) echo "bad key: $k"; exit 1 ;; esac
+            n=$((n+1))
+          done
+          [ "$n" -ge 1 ] && [ "$n" -le 50 ] || { echo "give 1 to 50 keys"; exit 1; }
+          printf '%s\n' $IN_KEYS > "$RUNNER_TEMP/keys.txt"
+
+      - name: Refuse files a live list still names
+        run: |
+          L="$RUNNER_TEMP/live"; mkdir -p "$L"
+          for f in plugins.json plugins-linux-arm64.json plugins-linux-arm-v7.json; do
+            code=$(curl -sS -H 'Cache-Control: no-cache' -o "$L/$f" -w '%{http_code}' "https://plugins.holyarrs.com/$f?r=$RANDOM") || code=000
+            case "$code" in 200) ;; 404) rm -f "$L/$f" ;; *) echo "fetching $f: HTTP $code"; exit 1 ;; esac
+          done
+          python3 - "$L" "$RUNNER_TEMP/keys.txt" <<'PY'
+          import base64, json, os, sys
+          d, keys = sys.argv[1], open(sys.argv[2]).read().split()
+          used = []
+          for n in os.listdir(d):
+              p = json.loads(base64.b64decode(json.loads(open(os.path.join(d, n), "rb").read())["payload"]))
+              for e in p.get("entries") or []:
+                  used.append(f"plugins/{e['id']}/{e['version']}/")
+                  used.append(f"source/{e['id']}/{e['version']}.tar.xz")
+                  used.append(f"images/{e['id']}/")
+          bad = [k for k in keys if any(k.startswith(u) for u in used)]
+          if bad:
+              sys.exit("still named by a live list: " + " ".join(bad))
+          print(f"{len(keys)} key(s) are not named by any live list")
+          PY
+
+      - name: Delete
+        if: ${{ !inputs.dry_run }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          EP="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          while read -r k; do
+            aws s3api delete-object --endpoint-url "$EP" --bucket holyarrs-plugins --key "$k" >/dev/null
+            echo "deleted $k"
+          done < "$RUNNER_TEMP/keys.txt"
+
+      - name: Check they are gone
+        if: ${{ !inputs.dry_run }}
+        run: |
+          sleep 30
+          while read -r k; do
+            code=$(curl -sS -H 'Cache-Control: no-cache' -o /dev/null -w '%{http_code}' "https://plugins.holyarrs.com/$k?r=$RANDOM") || code=000
+            echo "$k: HTTP $code"
+            [ "$code" = 404 ] || echo "::warning::$k still answers $code (cache?)"
+          done < "$RUNNER_TEMP/keys.txt"

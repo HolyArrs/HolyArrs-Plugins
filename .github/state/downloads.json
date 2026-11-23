@@ -1,0 +1,14 @@
+{
+ "days": {
+  "2026-11-20": {
+   "pipeline-test": 6
+  }
+ },
+ "listed": {
+  "tailscale": "2026-11-20T17:47:10Z"
+ },
+ "through": "2026-11-23T01:00:00Z",
+ "totals": {
+  "pipeline-test": 6
+ }
+}

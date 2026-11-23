@@ -1,0 +1,78 @@
+# Totals are pushed before the upload, so a failed push never counts an hour twice.
+# Counts plugin downloads from holyarrs.com zone HTTP analytics (cache hits included) every hour and uploads
+# plugins.holyarrs.com/stats.json. Running totals live in .github/state/downloads.json.
+# It also copies each listed author's GitHub picture to images/avatars/<login>-64.webp,
+# so the app never loads pictures from github.com.
+# It redraws the README plugin gallery (docs/assets/plugins-*.svg, wide and narrow) and commits it only when it changed.
+name: HolyArrs Plugins - Download counts
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plugin-stats
+  cancel-in-progress: false
+
+jobs:
+  count:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Settings > Environments > plugin-stats: main only. One token with
+    # Zone Analytics Read on holyarrs.com + R2 Bucket Item Write on holyarrs-plugins.
+    environment: plugin-stats
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0   # "listed" dates come from when catalog/active/<id>.json was first added
+          persist-credentials: false
+      - name: Count
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/stats.py fetch .github/state/downloads.json "$RUNNER_TEMP/stats.json"
+      - name: Draw the README gallery
+        run: |
+          python3 .github/scripts/gallery.py --stats "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/readme_list.py
+      - name: Record the totals and the gallery
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add .github/state/downloads.json docs/assets/plugins-*.svg README.md
+          if git diff --cached --quiet; then echo "totals and gallery unchanged"; exit 0; fi
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -m "Record download counts"
+          # Other pushes may land during the run; put the record on top of them.
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com pull --rebase "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+      - name: Upload stats.json
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 cp --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" --no-progress \
+            --cache-control "public, max-age=300" --content-type application/json \
+            "$RUNNER_TEMP/stats.json" s3://holyarrs-plugins/stats.json
+      - name: Install the picture tools
+        run: python3 -m pip install --disable-pip-version-check "pillow==11.3.0"
+      - name: Refresh developer pictures
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          mapfile -t LOGINS < <(python3 .github/scripts/images.py authors .)
+          [ "${#LOGINS[@]}" -gt 0 ] || { echo "no listed authors"; exit 0; }
+          python3 .github/scripts/images.py avatars --out "$RUNNER_TEMP/pics" "${LOGINS[@]}" || echo "no picture could be fetched"
+          bash .github/scripts/live.sh images "$RUNNER_TEMP/pics"

@@ -1,0 +1,20 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem privately
+    url: https://github.com/HolyArrs/HolyArrs/security/advisories/new
+    about: A harmful plugin or a leaked key. Please don't post it in public.
+  - name: A problem with HolyArrs itself
+    url: https://github.com/HolyArrs/HolyArrs/issues
+    about: Bugs in the app go to the main repo.
+  - name: Questions and help
+    url: https://community.holyarrs.com/c/help/6
+    about: Ask on the HolyArrs Community how to make or install a plugin.
+  - name: Plugin ideas
+    url: https://community.holyarrs.com/c/feature-ideas/10
+    about: Post it on the HolyArrs Community so others can vote.
+  - name: Chat on Discord
+    url: https://discord.com/invite/mthsvesKpC
+    about: Quick questions and chat.
+  - name: r/HolyArrs
+    url: https://www.reddit.com/r/HolyArrs/
+    about: News and talk on Reddit.

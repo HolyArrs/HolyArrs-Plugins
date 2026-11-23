@@ -1,0 +1,42 @@
+# Checks every plugin file against docs/template/plugin.schema.json on each pull
+# request and push. Nothing is signed or uploaded here.
+name: HolyArrs Plugins - Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the schema checker
+        run: python -m pip install --disable-pip-version-check "jsonschema==4.23.0"
+      - name: Check the plugin files
+        run: |
+          python .github/scripts/check.py
+          python .github/scripts/check_test.py
+      - name: Check the README plugin table
+        run: |
+          python .github/scripts/readme_list.py --check
+          python .github/scripts/readme_list_test.py
+          python .github/scripts/gallery_test.py
+      - name: Install the picture tools
+        run: |
+          sudo apt-get install -y --no-install-recommends libcairo2 >/dev/null
+          python -m pip install --disable-pip-version-check "pillow==11.3.0" "cairosvg==2.8.2"
+      - name: Test the picture and download-count tools
+        run: |
+          python .github/scripts/images_test.py
+          python .github/scripts/stats_test.py

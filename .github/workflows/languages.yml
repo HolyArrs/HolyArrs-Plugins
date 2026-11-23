@@ -1,0 +1,112 @@
+# Signs the language packs in languages/ into languages.json and uploads them
+# to plugins.holyarrs.com (R2 bucket holyarrs-plugins), next to the plugin lists.
+# The readable files (SOURCE_DIR in languages.py, now plugins/language-packs/<code>.json) are from the app's build
+# (app/frontend/lang-out); catalog/active/language-packs.json is their index
+# (.github/scripts/languages.py index). Nothing here is run, and no HolyArrs
+# app code is needed: languages.py packs and signs on its own.
+name: HolyArrs Plugins - Languages
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Pack, sign and check only. Nothing is uploaded
+        type: boolean
+        default: true
+      live_url:
+        description: Live site to compare against. Empty skips that check (only before the site is up)
+        default: https://plugins.holyarrs.com/
+
+permissions:
+  contents: read
+
+# Shares the group with publish and block, so two runs never sign at once.
+concurrency:
+  group: plugin-lists
+  cancel-in-progress: false
+
+jobs:
+  sign:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: plugin-signing
+    permissions:
+      # write: the run commits .github/state/lists.json after a successful upload.
+      contents: write
+    steps:
+      - name: Check the inputs
+        env:
+          IN_LIVE: ${{ inputs.live_url }}
+        run: '[ -z "$IN_LIVE" ] || [[ "$IN_LIVE" =~ ^https://[A-Za-z0-9.-]+/$ ]] || { echo "bad live url"; exit 1; }'
+      - name: Get this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          path: list
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install the signing library
+        run: python3 -m pip install --disable-pip-version-check "cryptography==44.0.2"
+      - name: Check the language files and their index
+        run: |
+          python3 list/.github/scripts/languages.py check
+          python3 list/.github/scripts/languages_test.py
+
+      - name: Write the signing key to a private temp file
+        env:
+          PLUGIN_SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
+        run: |
+          umask 077
+          mkdir -p "$RUNNER_TEMP/sk"
+          printf '%s\n' "$PLUGIN_SIGNING_KEY" > "$RUNNER_TEMP/sk/plugin-signing.key"
+
+      - name: Pack, sign and check
+        env:
+          LIVE_URL: ${{ inputs.live_url }}
+        run: |
+          OUT="$RUNNER_TEMP/site"
+          bash list/.github/scripts/live.sh seed "$OUT"
+          bash list/.github/scripts/live.sh trust "$OUT" list/.github/state/lists.json
+          python3 list/.github/scripts/languages.py sign \
+            --key "$RUNNER_TEMP/sk/plugin-signing.key" \
+            --live-url "$LIVE_URL" \
+            --out "$OUT"
+          find "$OUT/languages" -type f | sort
+
+      - name: Remove the signing key
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/sk/plugin-signing.key" ]; then shred -u "$RUNNER_TEMP/sk/plugin-signing.key"; fi
+          rm -rf "$RUNNER_TEMP/sk"
+
+      - name: Upload to plugins.holyarrs.com
+        if: ${{ !inputs.dry_run }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+        run: bash list/.github/scripts/live.sh upload "$RUNNER_TEMP/site"
+
+      - name: Check the live site
+        if: ${{ !inputs.dry_run }}
+        run: bash list/.github/scripts/live.sh check "$RUNNER_TEMP/site"
+
+      - name: Record the signed state
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash list/.github/scripts/live.sh record "$RUNNER_TEMP/site" list/.github/state/lists.json
+          cd list
+          # The README shows Language packs only once a released version is live, so redraw it from the new record.
+          curl -fsS "https://plugins.holyarrs.com/stats.json" -o "$RUNNER_TEMP/stats.json" || echo "{}" > "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/gallery.py --stats "$RUNNER_TEMP/stats.json"
+          python3 .github/scripts/readme_list.py
+          git add .github/state/lists.json README.md docs/assets/plugins-*.svg
+          if git diff --cached --quiet; then echo "record unchanged"; exit 0; fi
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -m "Record signed lists after $GITHUB_WORKFLOW run $GITHUB_RUN_ID"
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com pull --rebase "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
