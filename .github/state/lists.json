@@ -11,27 +11,30 @@
     "sha256": "c2b513a04519bba7137cceff60df5faf2f194d496b26cca10afa592728abaed4"
   },
   "plugins-linux-arm-v7.json": {
-    "counter": 7,
+    "counter": 8,
     "ids": [
+      "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "aa532958c2eeca5fef535a808664ea59ee2d89cc7757672cd5a82b8f28862673"
+    "sha256": "879a6e15b7d2506f9bcefab8da9f46632922c7739c6ae56de3352e5d253e390b"
   },
   "plugins-linux-arm64.json": {
-    "counter": 7,
+    "counter": 8,
     "ids": [
+      "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "48f9906578065c7ff9e1f50c4f904414258e5fa3bd83c96a489b4464c8f01faf"
+    "sha256": "7590ff6070fda59692161c9777cfaba20d748148059247de4129d70aee57e7c9"
   },
   "plugins.json": {
-    "counter": 7,
+    "counter": 8,
     "ids": [
+      "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "40d12fd7aa7f6ce7c5a5751fa8ce947343e4a39cb60b6da21e1cc65f50bd2cc6"
+    "sha256": "1defaa4d579e2aad1a950fc29aecd788443fb304c4cbbd19a1814bea5cacdc9d"
   }
 }
