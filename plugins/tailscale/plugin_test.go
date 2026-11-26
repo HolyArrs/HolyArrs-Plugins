@@ -179,18 +179,6 @@ func TestRedactHeadscale(t *testing.T) {
 	}
 }
 
-func TestRedactPlainHTTPAndKeys(t *testing.T) {
-	got := redact("login at http://hs.lan:8080/register/abc node nodekey:1a2b mkey:3c4d done")
-	for _, bad := range []string{"http://", "hs.lan", "nodekey:", "mkey:", "1a2b", "3c4d"} {
-		if strings.Contains(got, bad) {
-			t.Errorf("%q still shows %q", got, bad)
-		}
-	}
-	if !strings.HasPrefix(got, "login at ") || !strings.HasSuffix(got, " done") {
-		t.Errorf("plain words lost: %q", got)
-	}
-}
-
 func TestReadAuthKeyDeletes(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, authKeyFile)

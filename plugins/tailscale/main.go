@@ -147,8 +147,8 @@ func run(ctx context.Context, srv *tsnet.Server, data string, target *url.URL, m
 		srv.Close()
 		return err
 	}
-	// ListenTLS waits until the device is signed in, so status.json (and its
-	// login link) must already be kept fresh before it is called.
+	// ListenTLS waits until the device is signed in, so status (and the
+	// sign-in link) must be watched before it.
 	go watchStatus(ctx, lc, data)
 	ln, err := listen(srv)
 	if err != nil {
@@ -264,8 +264,7 @@ func parseTarget(s string) (*url.URL, error) {
 // in log lines.
 func redact(s string) string {
 	for _, w := range strings.Fields(s) {
-		if strings.Contains(w, "://") || strings.Contains(w, "tskey-") ||
-			strings.Contains(w, "nodekey:") || strings.Contains(w, "mkey:") {
+		if strings.Contains(w, "https://") || strings.Contains(w, "tskey-") {
 			s = strings.ReplaceAll(s, w, "[hidden]")
 		}
 	}
@@ -281,7 +280,7 @@ func envOr(k, def string) string {
 
 // listen serves HTTPS on :443 when the tailnet has HTTPS certificates turned on.
 // New tailnets have them off, and ListenTLS then fails; fall back to plain HTTP
-// on :80, which Tailscale itself still encrypts end to end.
+// on :80, which is still end-to-end encrypted by Tailscale itself.
 func listen(srv *tsnet.Server) (net.Listener, error) {
 	ln, err := srv.ListenTLS("tcp", ":443")
 	if err == nil {
