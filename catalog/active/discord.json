@@ -1,0 +1,10 @@
+{
+  "id": "discord",
+  "name": "Discord",
+  "description": "A Discord bot for your server: account linking, self-updating library tiles, requests from Discord and a message when a request is available.",
+  "authors": ["NotCavnfox"],
+  "repo": "https://github.com/NotCavnfox/holyarrs-discord",
+  "tag": "1.0.0",
+  "commit": "6f3b48239a71b1d2cd277ebf0e1fffef5f90a780",
+  "min_app_version": "1.3.2"
+}
