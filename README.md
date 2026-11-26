@@ -61,7 +61,7 @@ Why you can trust them:
 ## 🗂️ Plugins you can install
 
 <!-- gallery:start -->
-<a href="catalog/active/"><picture><source media="(max-width: 600px) and (prefers-color-scheme: light)" srcset="docs/assets/plugins-light-narrow.svg"><source media="(max-width: 600px)" srcset="docs/assets/plugins-dark-narrow.svg"><source media="(prefers-color-scheme: light)" srcset="docs/assets/plugins-light.svg"><img src="docs/assets/plugins-dark.svg" width="100%" alt="Plugins you can install: Tailscale by CoderLuii, version 1.0.0; Language Packs by CoderLuii, version 1.0.0"></picture></a>
+<a href="catalog/active/"><picture><source media="(max-width: 600px) and (prefers-color-scheme: light)" srcset="docs/assets/plugins-light-narrow.svg"><source media="(max-width: 600px)" srcset="docs/assets/plugins-dark-narrow.svg"><source media="(prefers-color-scheme: light)" srcset="docs/assets/plugins-light.svg"><img src="docs/assets/plugins-dark.svg" width="100%" alt="Plugins you can install: Language Checker by roychassi, version 1.0.1; Tailscale by CoderLuii, version 1.0.0; Language Packs by CoderLuii, version 1.0.0"></picture></a>
 <!-- gallery:end -->
 
 <details>
@@ -70,6 +70,7 @@ Why you can trust them:
 <!-- plugins:start -->
 <table>
 <tr><th>Plugin</th><th>What it does</th><th>Made by</th><th>Version</th></tr>
+<tr><td nowrap><b><a href="catalog/active/language-checker.json"><img src="https://raw.githubusercontent.com/roychassi/language-checker/8a858d389c6b875d7b9a9ec42abab249221dff4d/icon.svg" width="20" height="20" align="absmiddle" alt="Language Checker">&nbsp;Language Checker</a></b></td><td>Turns down releases HolyArrs refuses for a missing audio language, so they are blocklisted for that movie or episode and searched again.</td><td nowrap><a href="https://github.com/roychassi"><img src="https://github.com/roychassi.png?size=40" width="20" height="20" align="absmiddle" alt="">&nbsp;roychassi</a></td><td nowrap><code>1.0.1</code></td></tr>
 <tr><td nowrap><b><a href="catalog/active/tailscale.json"><img src="plugins/tailscale/icon.svg" width="20" height="20" align="absmiddle" alt="Tailscale">&nbsp;Tailscale</a></b></td><td>Reach HolyArrs from anywhere through your own Tailscale network, without opening ports. Sign-in is still required for every visit.</td><td nowrap><a href="https://github.com/CoderLuii"><img src="https://github.com/CoderLuii.png?size=40" width="20" height="20" align="absmiddle" alt="">&nbsp;CoderLuii</a></td><td nowrap><code>1.0.0</code></td></tr>
 <tr><td nowrap><b><a href="plugins/language-packs/"><img src="plugins/language-packs/icon.svg" width="20" height="20" align="absmiddle" alt="Language Packs">&nbsp;Language Packs</a></b></td><td>HolyArrs in 43 more languages. Pick yours during setup or in My account.</td><td nowrap><a href="https://github.com/CoderLuii"><img src="https://github.com/CoderLuii.png?size=40" width="20" height="20" align="absmiddle" alt="">&nbsp;CoderLuii</a></td><td nowrap><code>1.0.0</code></td></tr>
 </table>

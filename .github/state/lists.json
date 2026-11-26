@@ -11,24 +11,27 @@
     "sha256": "c2b513a04519bba7137cceff60df5faf2f194d496b26cca10afa592728abaed4"
   },
   "plugins-linux-arm-v7.json": {
-    "counter": 6,
+    "counter": 7,
     "ids": [
+      "language-checker",
       "tailscale"
     ],
-    "sha256": "dcea17709bccd6302ba623c871a15b764468042061709677b5f1c41ca3c48c07"
+    "sha256": "aa532958c2eeca5fef535a808664ea59ee2d89cc7757672cd5a82b8f28862673"
   },
   "plugins-linux-arm64.json": {
-    "counter": 6,
+    "counter": 7,
     "ids": [
+      "language-checker",
       "tailscale"
     ],
-    "sha256": "658f8d927a38d5202ca030087d35e4bd42d5ef0b3ceec4a5792bad6d637f404b"
+    "sha256": "48f9906578065c7ff9e1f50c4f904414258e5fa3bd83c96a489b4464c8f01faf"
   },
   "plugins.json": {
-    "counter": 6,
+    "counter": 7,
     "ids": [
+      "language-checker",
       "tailscale"
     ],
-    "sha256": "8973f36c6a63056c48c877e8283cfe6e8c7580ef92211e4a11ceb0f6aa994240"
+    "sha256": "40d12fd7aa7f6ce7c5a5751fa8ce947343e4a39cb60b6da21e1cc65f50bd2cc6"
   }
 }
