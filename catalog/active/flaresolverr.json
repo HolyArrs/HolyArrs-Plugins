@@ -1,0 +1,13 @@
+{
+  "id": "flaresolverr",
+  "name": "FlareSolverr",
+  "description": "Gets Sources past a site's bot check (Cloudflare, DDoS-Guard) with the FlareSolverr you run.",
+  "authors": [
+    "wozniakpawel"
+  ],
+  "repo": "https://github.com/wozniakpawel/holyarrs-flaresolverr",
+  "tag": "1.0.0",
+  "version": "1.0.0",
+  "commit": "8fb3ebbea0b3f720365f8b6ea66dbe9d3915bd89",
+  "min_app_version": "1.3.2"
+}

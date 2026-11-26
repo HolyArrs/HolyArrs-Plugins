@@ -9,7 +9,7 @@ A plugin is one Linux program. HolyArrs starts it, keeps it in a sandbox, and st
 It talks to HolyArrs over plain HTTP, never by listening on a port:
 
 - **API calls.** `HOLYARRS_PLUGIN_TARGET` is HolyArrs' local address and `HOLYARRS_PLUGIN_TOKEN` a key that's new on every start. Send `Authorization: Bearer $HOLYARRS_PLUGIN_TOKEN`. Only the routes covered by its approved permissions (`access.actions`) answer; everything else is 403. Calls are rate-limited and logged on the plugin's card.
-- **Hooks.** A plugin that is a download client, search source, metadata source, MCP tool, page, widget or event listener long-polls `GET /api/v1/plugin-hooks/<hook>` for work and answers with `POST`. Each hook needs its own permission.
+- **Hooks.** A plugin that is a download client, search source, metadata source, bot-check solver, MCP tool, page, widget or event listener long-polls `GET /api/v1/plugin-hooks/<hook>` for work and answers with `POST`. Each hook needs its own permission.
 - **Acting for a person.** `POST /api/v1/plugin-hooks/link` returns a code to show the person; they enter it in My account → Linked plugins. Then send `X-Holyarrs-For-User` on request, limit and follow calls; each needs both the plugin's permission and that person's own.
 
 ## What happens when
@@ -99,7 +99,7 @@ The manifest has three lists. The Plugins page shows all three before install.
 |---|---|
 | `access.hosts` | Up to 100. The only hosts it can reach, once the owner approves: names or `*.` wildcards, through a per-plugin proxy on 443 and 80. No raw IPs, no LAN unless the owner adds the host (up to 100, may give a port), no UDP, no listening. |
 | `access.folders` | Folders the owner picks and approves, read or read-write. A name or `{"name", "mode", "why", "required"}`; each arrives as `HOLYARRS_PLUGIN_FOLDER_<NAME>`, all in `HOLYARRS_PLUGIN_FOLDERS`. |
-| `access.actions` | HolyArrs 1.3.0+: the HolyArrs permissions it needs, from [.github/scopes.json](../.github/scopes.json). Shown to the owner by group, with red warnings for deletes, file changes, forwarding and acting as a download client. The plugin calls `HOLYARRS_PLUGIN_TARGET` with `Authorization: Bearer $HOLYARRS_PLUGIN_TOKEN`; anything outside its permissions answers 403. |
+| `access.actions` | HolyArrs 1.3.0+: the HolyArrs permissions it needs, from [.github/scopes.json](../.github/scopes.json). Shown to the owner by group, with red warnings for deletes, file changes, forwarding, opening Source pages behind a bot check and acting as a download client. The plugin calls `HOLYARRS_PLUGIN_TARGET` with `Authorization: Bearer $HOLYARRS_PLUGIN_TOKEN`; anything outside its permissions answers 403. |
 
 Hosts and folders can't contain `..` or `\`. Folder names have no `/` or `:`. An update that asks for more access waits for the owner.
 
