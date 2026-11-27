@@ -76,6 +76,7 @@ func main() {
 {
   "id": "my-plugin",
   "name": "My Plugin",
+  "version": "1.0.0",
   "author": "your-github-name",
   "description": "One line that says what it does.",
   "long_description": "A few sentences for the plugin's own page. What it does, what it needs, and anything people should know first.",
@@ -108,6 +109,7 @@ func main() {
 |---|---|---|
 | `id` | Yes | Lowercase letters, digits and dashes, up to 64. Same as your entry file |
 | `name` | Yes | Up to 40 characters |
+| `version` | Yes | The same number as your release tag, like `1.0.0`, with no `v` |
 | `author` | Yes | Up to 40 characters |
 | `description` | No | One line, up to 160 characters |
 | `licence` | Yes | Like `MIT` or `AGPL-3.0` |
@@ -137,7 +139,9 @@ The rules for each list are in the [plugin reference](plugin-api.md#the-access-l
 
 **settings**: up to 100. The rules for each field are in the [plugin reference](plugin-api.md#settings).
 
-**Leave out** `version`, `sha256`, `platforms`, `size` and `icon`. The version comes from your tag, and we fill in the rest when we publish.
+**Leave out** `sha256`, `platforms`, `size` and `icon`. We fill them in when we publish.
+
+**Keep `version`** and set it to your tag's number. Publishing uses the tag either way, but developer mode reads your file as it is and refuses it without `version`. Change it whenever you tag a new release.
 
 ## 2. Test it
 
@@ -159,7 +163,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -trimpath -mod=readonly -o 
 
 Keep `go.sum` in the repo so the build needs nothing outside it. Make sure it only writes inside `HOLYARRS_PLUGIN_DATA`, since the sandbox blocks everything else.
 
-HolyArrs only installs plugins from our signed list. You can't load your own build into HolyArrs to try it first, so test it this way before you submit. The sandbox will refuse three things that work on your machine: writing outside `HOLYARRS_PLUGIN_DATA` and approved folders, calling a host that isn't in `access.hosts`, and UDP or listening for connections.
+To try it inside HolyArrs before you submit, use [developer mode](https://github.com/HolyArrs/HolyArrs/blob/main/docs/dev/plugins.md#developer-mode) (HolyArrs 1.3.1 and newer). It runs your own build, unsigned, on your own server. The sandbox will refuse three things that work on your machine: writing outside `HOLYARRS_PLUGIN_DATA` and approved folders, calling a host that isn't in `access.hosts`, and UDP or listening for connections.
 
 ## 3. Tag a release
 
