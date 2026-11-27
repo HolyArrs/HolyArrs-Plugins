@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       id:
-        description: Plugin id (for example tailscale), or language-packs to sign and upload the language packs (with version resign: re-sign every list after a key change)
+        description: Plugin id (for example tailscale), or language-packs to sign and upload the language packs (version resign re-signs every list after a key change)
         required: true
       version:
         description: Version to publish (for example 1.0.0)
