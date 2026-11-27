@@ -1,40 +1,40 @@
 {
   "blocklist.json": {
-    "counter": 4,
-    "sha256": "99b1678b612039b9651625fe317d535ee2881e51defafa42e0b06ef7219f0b1b"
+    "counter": 5,
+    "sha256": "8fc19f7a4ba6d52993d9ef379227e7d3ba412c60d0a8aae65e9a825aec1b0204"
   },
   "languages.json": {
-    "counter": 15,
+    "counter": 16,
     "released": [
       "1.3.0"
     ],
-    "sha256": "c2b513a04519bba7137cceff60df5faf2f194d496b26cca10afa592728abaed4"
+    "sha256": "537ff83ef67b8fb55d214babd9ce800973b9bc8f0c9cea4cb30c480af2b53c34"
   },
   "plugins-linux-arm-v7.json": {
-    "counter": 8,
+    "counter": 9,
     "ids": [
       "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "879a6e15b7d2506f9bcefab8da9f46632922c7739c6ae56de3352e5d253e390b"
+    "sha256": "b6fba7450f740b32438771a903f677feedbd3c11e141054116b5dd45524c9f80"
   },
   "plugins-linux-arm64.json": {
-    "counter": 8,
+    "counter": 9,
     "ids": [
       "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "7590ff6070fda59692161c9777cfaba20d748148059247de4129d70aee57e7c9"
+    "sha256": "02c73d0d4670b716e44431301805ae4ef80892b860cf162685a94c92e46ccba8"
   },
   "plugins.json": {
-    "counter": 8,
+    "counter": 9,
     "ids": [
       "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "1defaa4d579e2aad1a950fc29aecd788443fb304c4cbbd19a1814bea5cacdc9d"
+    "sha256": "d779d224b64a2782c9c69f0c1d8b24a2ed290186a2c53101f76561e8d7004888"
   }
 }
