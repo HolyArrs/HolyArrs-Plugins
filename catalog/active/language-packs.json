@@ -9,309 +9,309 @@
   "path": "plugins/language-packs",
   "version": "1.0.0",
   "min_app_version": "1.3.0",
-  "app": "1.3.0",
-  "fit": "45cace0a6baa",
+  "app": "1.3.6",
+  "fit": "9cc4048cbf04",
   "languages": [
     {
       "code": "ar",
       "file": "plugins/language-packs/ar.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "133e9bd35d291d6d3d9b0d82569b06371edf1d9996a488e808928c1e1565fd19"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "fb32e2e8995993f690649ad00c30c8f205d799ee69ee5bf94a6a2fa5b827a5ea"
     },
     {
       "code": "bg",
       "file": "plugins/language-packs/bg.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "ebeccb2305ae1d9b6051e63eb1a4c1189abbbe9a786bf1b110ea76ff4da4b098"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "4455e3d15e91ae8ba1646da31a7c3d6f45850abde3fc839bf259dc890042e961"
     },
     {
       "code": "bn",
       "file": "plugins/language-packs/bn.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "ef5afaa67e6bc09d2ee84c03c80e8e2ac5ad8204545b38b4de9877ad05caecad"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "a14d2dfb7f2b7db78515a642835524494e54a767413b038e21e5c6d7b920c13a"
     },
     {
       "code": "ca",
       "file": "plugins/language-packs/ca.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "eb2d75a0e15ef91ec22af7a3d44c784ed48dc940ab8f77d66f5a45150dab3241"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "3c152bcb27bcee340fc97bd57d8e45fbaf78bc352fdcbe95e13019dc40110cad"
     },
     {
       "code": "cs",
       "file": "plugins/language-packs/cs.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "c2596ee601eda8be4948944eac170b220088c1918881b09d31677fff618b6fff"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "cbf7c035942762c6fc4d340902fa4805ae0abc85bc861a71e8cb1018bfabb159"
     },
     {
       "code": "da",
       "file": "plugins/language-packs/da.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "c0e653c22f7fbc26ec29929b1e3dffe7a6923ed4d9ae798970e0401cf22a97e1"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "f908877bfd6b60141d12d158c8d0a2f19af4854483875fdbfc9d03080601cf26"
     },
     {
       "code": "de",
       "file": "plugins/language-packs/de.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "b21a68e4fc5d31f2e83e4ea0f6000392597b71fa8198fb393b4d5a67f4006bec"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "7fa6718acca53101450ef5013b9f2b7c315954f50740910aaacee9e835cff009"
     },
     {
       "code": "el",
       "file": "plugins/language-packs/el.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "b35db7944b579c27eb6ad2fc885afc38c06b8e9cef66486d7c4b92e6fc80cf33"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "1b28b3259de59f89c22a4f24190ad54011c58f2fe203954ace9f1c4fb17135c9"
     },
     {
       "code": "es",
       "file": "plugins/language-packs/es.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "225e2a52d35bf0143e3a2c6212643575f0f704cee8358c98479d80ebe2d79e7e"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "39bba1fa2f0c33879cce38425c685b1b7b065e21ba7c30b372f0c03da93d11ba"
     },
     {
       "code": "et",
       "file": "plugins/language-packs/et.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "7f063d96e670cc92ebf028bafc16bab1b6ace73dfcc989971c20a4de3591a345"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "38ab7ad4160c82e63880da97937f7de22b268b23a952ec22c695f5d4ce21a5c8"
     },
     {
       "code": "fa",
       "file": "plugins/language-packs/fa.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "7073076e409741ab5a7b28840306f8bf6480100eaeb35a90dcd883abadec3aea"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "1504d09eb6853e51b038385ac397a9daa2f6a6bb2805b0f0f4b23c0e5339697d"
     },
     {
       "code": "fi",
       "file": "plugins/language-packs/fi.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "5b2296a36ceb7c328098cc343950af0ab599615369ebccd8d8aa65ee1bc84507"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "41cdcd4c0e29f8cc841e3de478baa4def82bfa0b232f88b03ecfc4b6d476a7e5"
     },
     {
       "code": "fil",
       "file": "plugins/language-packs/fil.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "e51439a0cbc34ca5630e0d16064e09311520f4a682955ab2ad3d5e8a574d4941"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "064050e721e5281869fbb6a0bf20ed6b213156bd740ee0bf8a44f4c73050cfd1"
     },
     {
       "code": "fr",
       "file": "plugins/language-packs/fr.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "2bc4386448becf6b456884a7d2686e5a8467217c97d1a166bd2b4bd01e24f100"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "fac4903fc9429022fc6fa6212b55096c51b6a0c6d30d9ec1e321dea73633f1ea"
     },
     {
       "code": "he",
       "file": "plugins/language-packs/he.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "34596c72ffb69873405005f1022bbb50147b256d091d04b227a41d0e3573556b"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "f88913b3a6aa27debdf65eb804c067f8bcdb251dddf3a1dc4d4dc06176faf438"
     },
     {
       "code": "hi",
       "file": "plugins/language-packs/hi.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "1d033474ad447423e4a1199f71b4d6342f820bc428fc7921fe512c8e771c712e"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "c4f20b6dbd47e294494001934c6385f52b7ec5fda70a8bd79976ed78cfec7c69"
     },
     {
       "code": "hr",
       "file": "plugins/language-packs/hr.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "57d0f48b90144607b07c6054c6e93d72cedc997764b7435d6ebda8d5d7b2a84f"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "36af2dc5add2afee394be51edebd6bf66c8e2d1d46493e7a4cd7ee70a0891d6f"
     },
     {
       "code": "hu",
       "file": "plugins/language-packs/hu.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "7e3fc15db4de0dc98c153b43ec90500277b7f351eab5f819c06a6a1f6a770356"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "79f69f2860ab0b8e3d27c77d31006a5a72f73f25269032e9e16e7a8ddd346b35"
     },
     {
       "code": "id",
       "file": "plugins/language-packs/id.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "216798cf0e501d8e86d7f199adc3f501819246e107ff50c07395cb0fde2bad0b"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "bf1aa73e2b5ed7562946ca72e6be9d936a2cbef9de0a35c9b9eaef57325cc2b8"
     },
     {
       "code": "is",
       "file": "plugins/language-packs/is.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "c8b7c7d9d85337ec6ee190cc77f77ac40085112b21cf0353e547d7f166105274"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "0ff23c2e1f4399a3766bbce94373a8c9c920f70cee294e22b33cfabfe15a5516"
     },
     {
       "code": "it",
       "file": "plugins/language-packs/it.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "cdf8784399923633f9e276bf53e7370aed49f91d9bf613443af1a85e9de8aeeb"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "6a98221c9059c732a6191a195f899a3947c61dfb5959813c5f824befc4447241"
     },
     {
       "code": "ja",
       "file": "plugins/language-packs/ja.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "97676f196f2f03d9839cd4d9eccc489a161b1965ab1efcb621e55943a619d4f8"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "fa85e361901df149ebfe99b4d546fcf27c2d74b857263f0afb0bdb9757f4d90d"
     },
     {
       "code": "ko",
       "file": "plugins/language-packs/ko.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "672327ed06eee7a01a9215f4413f974b8b85fdb86a4b44ab16436d7c32fcb258"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "91896c486328548aaecee62d5271ee63edf100e202b7e71a523763002ac5fb70"
     },
     {
       "code": "lt",
       "file": "plugins/language-packs/lt.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "1905ba754601c102effbdf208292d66de30fba349d3e1485b8a5025f86a39682"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "6f34dba9e16f22bc4ad2f097406c6a6fb51887c8f1cfd949ca465a786cedf729"
     },
     {
       "code": "lv",
       "file": "plugins/language-packs/lv.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "c9e273e6a89bfc0ae7f4474de1c37f957f57caddeec80fc9d57f30c014fa59ab"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "5de6cd006dfa1c35a569e477276c1580c629af9cc09822ad943517f40c85412d"
     },
     {
       "code": "ms",
       "file": "plugins/language-packs/ms.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "300de164a8ee9facb36fa2d6e675f5c0d2d3411523dc8921be1bfa00f533ae52"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "97bd68079554d48e5c253008bc1c74da4b61d4aa2b489b85cee16c21844e36b5"
     },
     {
       "code": "nb",
       "file": "plugins/language-packs/nb.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "e1c6da67882c311e969e6d65924fb55b2f5ebfa2b9ff48e403694680c7d36022"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "edcb35bb673ebd950ab05ae288189c2845b913557f3a2952cf7987b7fed34881"
     },
     {
       "code": "nl",
       "file": "plugins/language-packs/nl.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "ea1d3d3a09a43b0086495469a12d7fd11e2080e911dac0b73e131499aa4204ed"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "6e9fb86476312a1591704e1dae994a9fd7158c747c771be4e8030b581a5bbd7e"
     },
     {
       "code": "pl",
       "file": "plugins/language-packs/pl.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "da24c42186a4f0f38c896d1e79e8e09bfbc17f0f4bfdec76ad83ecad7b18d682"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "a834847606578e2e860af0d2ce750bd1770b4e0a206f374f0c31ce0e67c15da5"
     },
     {
       "code": "pt-br",
       "file": "plugins/language-packs/pt-br.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "f84f6c29155571790cb61c9aff50a53789ee0da9d9570d3511e84e412cf7f347"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "fe92123b6c8532bb95082265bed28efce0cf1d84e88c7760e58450e7297adebc"
     },
     {
       "code": "pt-pt",
       "file": "plugins/language-packs/pt-pt.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "3235bd48b97dc0f7ff39aff0ed129405d372f272fe2f30389b428c34eb14c81c"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "9eada6572bb303853e1b6f98f84325874623b1158b7229cff4d368d154b361d3"
     },
     {
       "code": "ro",
       "file": "plugins/language-packs/ro.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "f365c31dbf53cf835c199c11b75159cbae883fbff32ada34eb18a19dfe055763"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "c2f580f083deb0ef69f69cacaa4b13c5202c9be87fe33c513a7e2cc21ae1f8d8"
     },
     {
       "code": "ru",
       "file": "plugins/language-packs/ru.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "a2c840929b769e1b402fa1bcb371fcb86487bf2a5fbf9d2b2cb2aac4cc4efd09"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "455c83a977046a019a485877e65b72d59412ad84d7b8838bc7538981068f32d7"
     },
     {
       "code": "sk",
       "file": "plugins/language-packs/sk.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "077acac7b11350e4445b7bb4289c0ab5e53e5ae27e9614143109798aa5265691"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "3b6285177e88b3a651c7fbf977899b785f01c19b029a080fb6df2511fd3b8c1e"
     },
     {
       "code": "sr",
       "file": "plugins/language-packs/sr.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "432cc0534784ed096208d371517b79306e9008d2b1a101c1b91ed0eb05a0c113"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "00373fb8414076d584aff0366b0e381017bd75e70baa29df5853dd6e61061f58"
     },
     {
       "code": "sv",
       "file": "plugins/language-packs/sv.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "06f6355c81ed37e632088764c669b3fc48ce224c0742d1fdfe53682ee1d9ee64"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "afd9e5893390774186ed9293075cbd5aece5fa01d5de13b6120a8b764ad58a24"
     },
     {
       "code": "ta",
       "file": "plugins/language-packs/ta.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "8abb2ef51e6658f34059aa33f70a8be6a24927da9704260da6399e361b327f15"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "858b8467cf737eb0ec957b3c3e1e41e4ee07333e921715c9cec25de825186e55"
     },
     {
       "code": "th",
       "file": "plugins/language-packs/th.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "fe7e740d9d7c23b449fd98f41c2929b268ae3b540b0f2cfa0aa1d25f6d63848f"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "b15264eb59823c7fd11690f71fa8663f97af793fba19dad91963e3156226bc56"
     },
     {
       "code": "tr",
       "file": "plugins/language-packs/tr.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "5d9b44da519f09b01eedcb7f874b1c3b9ab19d663580e3396adcd0edc7fa79e6"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "9a8a123b0646dfc7eb9b4ed399f29cf135c22ff65e5d7985e4ba4e2665a0ff44"
     },
     {
       "code": "uk",
       "file": "plugins/language-packs/uk.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "c8f121c57d7419ddea32c409a99e3e2a7e1e96872c79a7c7a967c79f9b050f41"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "5af7000622a4274f3c51784060fc41d85822400d10fa13cdd12de0af99ee863c"
     },
     {
       "code": "vi",
       "file": "plugins/language-packs/vi.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "da4f79576ba4999483affe2118ba85623f3921ea5e20214b29b9ef749533ebb8"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "afe5e3436e788d964a44ec5864c2a3a0e755e37535a292236bf7c6e67b297025"
     },
     {
       "code": "zh-cn",
       "file": "plugins/language-packs/zh-cn.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "ecc3db9b7c5aaa135d79736306a0e083f814d157d9c400797479cd07a7087700"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "155883460adf82ba3d1ead5ed8593aa7e90a0b5ecd7e1c291831736cca8c67f7"
     },
     {
       "code": "zh-tw",
       "file": "plugins/language-packs/zh-tw.json",
-      "lines": 12352,
-      "translated": 12352,
-      "sha256": "1103dc7808da885e85c592f624fbeee5cc547f8459872b6155f244466178a27f"
+      "lines": 12454,
+      "translated": 12454,
+      "sha256": "20fc48137eab7f25693597032bf62a8787ff364a448ebe6bbb0df32da253c1e4"
     }
   ]
 }
