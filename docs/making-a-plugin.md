@@ -111,19 +111,20 @@ func main() {
 | `name` | Yes | Up to 40 characters |
 | `version` | Yes | The same number as your release tag, like `1.0.0`, with no `v` |
 | `author` | Yes | Up to 40 characters |
-| `description` | No | One line, up to 160 characters |
+| `description` | Yes | One line, up to 160 characters |
 | `licence` | Yes | Like `MIT` or `AGPL-3.0` |
 | `support_email` | Yes | An email address people can reach you at |
 | `min_app_version` | Yes | `x.y.z`, 1.3.0 for new plugins |
 | `access` | Yes | `hosts`, `folders`, `actions`. Can be empty lists |
-| `long_description` | No | Up to 2000 characters |
-| `how_it_works` | No | Up to 8 steps, 160 characters each |
+| `long_description` | Yes | Up to 2000 characters |
+| `how_it_works` | Yes | 1 to 8 steps, 160 characters each |
 | `whats_new` | No | Up to 300 characters |
-| `category` | No | Up to 24 characters |
+| `category` | Yes | Up to 24 characters |
 | `developers` | No | Up to 5 GitHub user names |
-| `repo`, `support_url` | No | https links |
+| `repo` | Yes | https link to your public repo |
+| `support_url` | No | https link |
 | `icon_file` or `icon_url` | Yes | Your logo: a `.svg` or `.png` in the folder, or an https link |
-| `settings` | No | Up to 20, see below |
+| `settings` | No | Up to 100, see below |
 
 All text is plain text. `<` and `>` aren't allowed.
 
@@ -203,15 +204,15 @@ Your code stays in your own repo; `catalog/` only lists it, the same way it list
 | `description` | One line, 10 to 160 characters |
 | `authors` | Your GitHub user names, at least one |
 | `repo` | `https://github.com/<owner>/<repo>`, public |
-| `path` | Optional. The plugin folder, if it isn't the repo root |
+| `path` | Optional. The plugin folder, if it isn't the repo root. The only optional field here |
 | `tag` | The release tag, up to 16 characters |
 | `commit` | The full 40-character commit of that tag |
-| `icon_url` | Optional. A direct https link to your logo, if `holyarrs-plugin.json` has none |
-| `min_app_version` | Optional here. 1.3.0 for new plugins |
+| `icon_url` | A direct https link to your logo, pinned to the commit |
+| `min_app_version` | The oldest HolyArrs it needs. 1.3.0 for new plugins |
 
-No other keys are allowed. A repo that holds several plugins can tag each one as `<id>-v1.0.0` (our own plugins in [`plugins/`](../plugins/) do). The template values are fake on purpose, and the check refuses them. The rules for this file live in [`template/plugin.schema.json`](template/plugin.schema.json); see [how the schema is used](template/README.md#how-the-schema-is-used).
+No other keys are allowed, `version` included: your tag is the version. A repo that holds several plugins can tag each one as `<id>-v1.0.0` (our own plugins in [`plugins/`](../plugins/) do). The template values are fake on purpose, and the check refuses them. The rules for this file live in [`template/plugin.schema.json`](template/plugin.schema.json); see [how the schema is used](template/README.md#how-the-schema-is-used).
 
-The logo can be PNG, JPEG, WebP or SVG, 16 to 4096 px a side, up to 2 MB. Square at 256 x 256 or larger looks best. We copy it to plugins.holyarrs.com, so HolyArrs never loads it from your link. Without one, the app shows your plugin's first letter.
+The logo can be PNG, JPEG, WebP or SVG, 16 to 4096 px a side, up to 2 MB. Square at 256 x 256 or larger looks best. We copy it to plugins.holyarrs.com, so HolyArrs never loads it from your link.
 
 Then update the plugin table in the README. Our check fails if you skip this:
 

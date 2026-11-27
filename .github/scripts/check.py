@@ -77,7 +77,7 @@ def check_entry(f, bad, seen):
     if pid in seen:
         bad.append(f"{rel}: id is also used by {seen[pid]}")
     seen.setdefault(pid, rel)
-    for k in ("id", "repo", "commit"):
+    for k in ("id", "repo", "commit", "icon_url"):
         if e.get(k) == template.get(k):
             bad.append(f"{rel}: {k} is still the template value")
     if any(part in (".", "..") for part in str(e.get("path", "")).split("/")):
@@ -87,8 +87,6 @@ def check_entry(f, bad, seen):
     tv = tag_version(e)
     if isinstance(e.get("tag"), str) and not VER_RE.fullmatch(tv):
         bad.append(f"{rel}: tag must be a version like 1.0.0 (v1.0.0 and <id>-v1.0.0 also work)")
-    if e.get("version") and e.get("version") != tv:
-        bad.append(f"{rel}: version {e.get('version')} is not the tag's version {tv}; leave version out or match the tag")
     m = e.get("min_app_version")
     if isinstance(m, str) and VER_RE.fullmatch(m) and ver(m) < (1, 2, 1):
         bad.append(f"{rel}: min_app_version must be 1.2.1 or newer")
@@ -147,9 +145,12 @@ def check_source(src, entry, bad):
     for k in FILLED_ON_PUBLISH:
         if k in m:
             bad.append(f"{where}: remove {k!r}; we fill it in when publishing")
-    for k in ("name", "author", "min_app_version", "licence", "support_email"):
+    for k in ("name", "version", "author", "description", "long_description", "how_it_works", "category",
+              "repo", "min_app_version", "licence", "support_email"):
         if not m.get(k):
             bad.append(f"{where}: {k} is required")
+    if entry and m.get("version") and m.get("version") != tag_version(entry):
+        bad.append(f"{where}: version {m.get('version')} is not the tag's version {tag_version(entry)}")
     if entry and m.get("id", entry.get("id")) != entry.get("id"):
         bad.append(f"{where}: id {m.get('id')!r} is not the entry's {entry.get('id')!r}")
     for k in ("name", "author", "description", "long_description", "whats_new", "category"):
@@ -184,7 +185,7 @@ def check_source(src, entry, bad):
                 bad.append(f"{where}: icon_file {icon!r} is outside the folder")
             elif not p.is_file():
                 bad.append(f"{where}: icon_file {icon!r} is not in the folder")
-    if not icon and not m.get("icon_url") and not (entry or {}).get("icon_url"):
+    if not icon and not m.get("icon_url"):
         bad.append(f"{where}: a logo is required: add icon_file (a .svg or .png in the folder) or icon_url")
 
     acc = m.get("access")

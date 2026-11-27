@@ -76,6 +76,9 @@ README.md              # short: what it does, settings, hosts
   "version": "1.0.0",
   "author": "github-login",
   "description": "One line that says what it does.",
+  "long_description": "A few sentences for the plugin's own page.",
+  "how_it_works": ["Install it.", "Set your API key in its settings."],
+  "category": "Tools",
   "licence": "MIT",
   "repo": "https://github.com/github-login/holyarrs-my-plugin",
   "support_email": "me@example.com",
@@ -97,15 +100,15 @@ Limits (characters unless it says entries). These are the stricter publish limit
 | `version` in `holyarrs-plugin.json` | required, the tag's version (`1.0.0` for tag `1.0.0` or `v1.0.0`); developer mode refuses the file without it; publishing uses the tag |
 | `name` | required, up to 40 |
 | `author` | required, up to 40 |
-| `description` | one line, up to 160 |
-| `long_description` | optional, up to 2000 |
+| `description` | required, one line, up to 160 |
+| `long_description` | required, up to 2000 |
 | `whats_new` | optional, up to 300 |
-| `how_it_works` | optional, up to 8 steps of 160 |
+| `how_it_works` | required, 1 to 8 steps of 160 |
 | `developers` | optional, up to 5 GitHub logins |
-| `category` | optional, up to 24 |
+| `category` | required, up to 24 |
 | `licence` | **required**, for example `MIT` or `AGPL-3.0` |
 | `support_email` | **required**; `support_url` optional, https only |
-| `repo` | https link to the public repo |
+| `repo` | required, https link to the public repo |
 | `icon_file` | `.svg` or `.png` in the same folder; a logo is required, as `icon_file` or `icon_url` |
 | `icon_url` | instead of `icon_file`, direct https link to a logo, 16 to 4096 px a side, up to 2 MB; we copy it |
 | `min_app_version` | required, `x.y.z`, `1.3.0` or newer for new plugins |
@@ -134,11 +137,12 @@ The pull request adds one file to this repo, `catalog/active/<id>.json`. Start f
   "repo": "https://github.com/github-login/holyarrs-my-plugin",
   "tag": "1.0.0",
   "commit": "<full 40-character commit the tag points to>",
+  "icon_url": "https://raw.githubusercontent.com/github-login/holyarrs-my-plugin/<commit>/icon.svg",
   "min_app_version": "1.3.0"
 }
 ```
 
-Optional: `path` (the plugin folder inside the repo, when it isn't the root) and `icon_url`. `version` is optional and must match the tag. No other keys are allowed. The entry `name` must also stay within 40 characters. The tag is the version that gets published, like `1.0.0`. Our tags have no `v`; a leading `v` still works and is dropped. A repo that holds several plugins can tag `<id>-v1.0.0`.
+Required: every field above, `icon_url` and `min_app_version` included. Optional: only `path` (the plugin folder inside the repo, when it isn't the root). Don't add `version`: the tag is the version. No other keys are allowed. The entry `name` must also stay within 40 characters. The tag is the version that gets published, like `1.0.0`. Our tags have no `v`; a leading `v` still works and is dropped. A repo that holds several plugins can tag `<id>-v1.0.0`.
 
 ## 5. Test it locally
 

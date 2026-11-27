@@ -7,7 +7,9 @@ import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 GOOD = {
-    "id": "demo-plugin", "name": "Demo", "author": "someone", "description": "Shows a demo.",
+    "id": "demo-plugin", "name": "Demo", "author": "someone", "description": "Shows a demo.", "version": "1.0.0",
+    "long_description": "A longer demo text.", "how_it_works": ["Install it."], "category": "Demo",
+    "repo": "https://github.com/someone/demo",
     "licence": "MIT", "support_email": "me@example.com", "min_app_version": "1.2.1", "icon_file": "icon.svg",
     "access": {"hosts": ["api.example.com"], "folders": [], "actions": []},
     "settings": [{"key": "api_key", "label": "API key", "type": "secret"},
@@ -19,7 +21,8 @@ def run(meta, extra=None, entry_extra=None):
     with tempfile.TemporaryDirectory() as t:
         t = pathlib.Path(t)
         entry = {"id": "demo-plugin", "name": "Demo", "description": "Shows a demo plugin.", "authors": ["someone"],
-                 "repo": "https://github.com/someone/demo", "tag": "v1.0.0", "commit": "a" * 40, "min_app_version": "1.2.1"}
+                 "repo": "https://github.com/someone/demo", "tag": "v1.0.0", "commit": "a" * 40, "min_app_version": "1.2.1",
+                 "icon_url": "https://example.com/logo.png"}
         (t / "demo-plugin.json").write_text(json.dumps({**entry, **(entry_extra or {})}))
         src = t / "src"
         src.mkdir()
@@ -64,12 +67,15 @@ assert code == 0, out
 code, out = run({**GOOD, "min_app_version": "1.3.0", "access": {"hosts": [], "folders": [], "actions": ["library.read", "library.music.read", "network.forward"]}})
 assert code == 0, out
 code, out = run(GOOD, entry_extra={"version": "1.0.0"})
-assert code == 0, out
-code, out = run(GOOD, entry_extra={"version": "2.0.0"})
+assert code == 1 and "version" in out, out
+code, out = run({**GOOD, "version": "2.0.0"})
 assert code == 1 and "is not the tag's version" in out, out
+for k in ("version", "description", "long_description", "how_it_works", "category", "repo"):
+    code, out = run({x: v for x, v in GOOD.items() if x != k})
+    assert code == 1 and f"{k} is required" in out, (k, out)
 code, out = run(GOOD, entry_extra={"source": "holyarrs"})
 assert code == 1 and "source" in out, out
-code, out = run(GOOD, entry_extra={"tag": "demo-plugin-v1.0.0", "version": "1.0.0"})
+code, out = run(GOOD, entry_extra={"tag": "demo-plugin-v1.0.0"})
 assert code == 0, out
 code, out = run(GOOD, entry_extra={"tag": "other-v1.0.0"})
 assert code == 1 and "tag must be a version" in out, out
@@ -103,7 +109,5 @@ no_logo = {k: v for k, v in GOOD.items() if k != "icon_file"}
 code, out = run(no_logo)
 assert code == 1 and "a logo is required" in out, out
 code, out = run({**no_logo, "icon_url": "https://example.com/logo.png"})
-assert code == 0, out
-code, out = run(no_logo, entry_extra={"icon_url": "https://example.com/logo.png"})
 assert code == 0, out
 print("check.py tests passed")
