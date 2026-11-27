@@ -285,20 +285,61 @@ def cmd_rotate(a):
     print(f"rotated: blocklist counter {blc}, plugin lists counter {pc}, signed with the pinned key")
 
 
+def cmd_resign(a):
+    """After a key change: re-signs every live list with the pinned key, counters one up,
+    entries unchanged. Each list must check with the pinned key or the previous one."""
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    pub = base64.b64decode(open(a.pub, encoding="utf-8").read().strip())
+    prev = base64.b64decode(open(a.previous_pub, encoding="utf-8").read().strip())
+    sk = Ed25519PrivateKey.from_private_bytes(base64.b64decode(open(a.key, encoding="utf-8").read().strip()))
+    if sk.public_key().public_bytes_raw() != pub:
+        raise Fail(f"the signing key is not the pinned key in {a.pub}")
+
+    def read(name, kind):
+        raw = fetch(a.out, name)
+        if raw is None:
+            return None
+        try:
+            return payload(raw, pub, kind, name)
+        except Fail:
+            return payload(raw, prev, kind, name + " (previous key)")
+
+    bl = read("blocklist.json", "blocklist")
+    if bl is None:
+        raise Fail("blocklist.json is not in --out; run live.sh seed first")
+    blc = bl["counter"] + 1
+    files = {"blocklist.json": sign_body(sk, dict(bl, counter=blc))}
+    for n in PLUGIN_LISTS:
+        p = read(n, "plugins")
+        if p is None:
+            raise Fail(f"{n} is not in --out; run live.sh seed first")
+        files[n] = sign_body(sk, dict(p, counter=p["counter"] + 1, min_blocklist_counter=blc))
+    lang = read("languages.json", "languages")
+    if lang is not None:
+        files["languages.json"] = sign_body(sk, dict(lang, counter=lang["counter"] + 1, min_blocklist_counter=blc))
+    for n, b in files.items():
+        kind = "blocklist" if n == "blocklist.json" else "languages" if n == "languages.json" else "plugins"
+        body = payload(b, pub, kind, n)
+        with open(os.path.join(a.out, n), "wb") as f:
+            f.write(b)
+        print(f"{n}: re-signed, counter {body['counter']}, {len(body.get('entries') or [])} entries")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("command", choices=["index", "check", "sign", "rotate"])
+    ap.add_argument("command", choices=["index", "check", "sign", "rotate", "resign"])
     ap.add_argument("--root", default=ROOT, help="the plugins repo (default: this checkout)")
     ap.add_argument("--out")
     ap.add_argument("--key")
     ap.add_argument("--live-url", default="https://plugins.holyarrs.com/")
     ap.add_argument("--replace-unreleased", default="", help="re-sign every pack of this app version, only while HolyArrs hasn't released it")
     ap.add_argument("--pub", default=os.path.join(ROOT, ".github", "keys", "main.pub"))
+    ap.add_argument("--previous-pub", default=os.path.join(ROOT, ".github", "keys", "previous.pub"))
     a = ap.parse_args(argv)
-    if a.command in ("sign", "rotate") and not (a.out and a.key):
+    if a.command in ("sign", "rotate", "resign") and not (a.out and a.key):
         ap.error("sign needs --out and --key")
     try:
-        {"index": cmd_index, "check": cmd_check, "sign": cmd_sign, "rotate": cmd_rotate}[a.command](a)
+        {"index": cmd_index, "check": cmd_check, "sign": cmd_sign, "rotate": cmd_rotate, "resign": cmd_resign}[a.command](a)
     except Fail as e:
         print("error:", e, file=sys.stderr)
         return 1
