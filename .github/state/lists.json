@@ -11,30 +11,33 @@
     "sha256": "537ff83ef67b8fb55d214babd9ce800973b9bc8f0c9cea4cb30c480af2b53c34"
   },
   "plugins-linux-arm-v7.json": {
-    "counter": 9,
+    "counter": 10,
     "ids": [
+      "discord",
       "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "b6fba7450f740b32438771a903f677feedbd3c11e141054116b5dd45524c9f80"
+    "sha256": "b31f76add27bf0e002d7101dbf81f70c3f8075e62a868d6b58263e9e97fad67b"
   },
   "plugins-linux-arm64.json": {
-    "counter": 9,
+    "counter": 10,
     "ids": [
+      "discord",
       "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "02c73d0d4670b716e44431301805ae4ef80892b860cf162685a94c92e46ccba8"
+    "sha256": "95aa7c6bf0cea523de1da56ae29e716f4d9e1edffc74e3633b7358338a4c32be"
   },
   "plugins.json": {
-    "counter": 9,
+    "counter": 10,
     "ids": [
+      "discord",
       "flaresolverr",
       "language-checker",
       "tailscale"
     ],
-    "sha256": "d779d224b64a2782c9c69f0c1d8b24a2ed290186a2c53101f76561e8d7004888"
+    "sha256": "24c8352d9891525c7b889091b035f3adfe6c3d5687ffce9d7d8cff6d3c3b32d5"
   }
 }
