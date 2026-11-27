@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       id:
-        description: Plugin id (for example tailscale), or language-packs to sign and upload the language packs
+        description: Plugin id (for example tailscale), or language-packs to sign and upload the language packs (with version resign: re-sign every list after a key change)
         required: true
       version:
         description: Version to publish (for example 1.0.0)
@@ -443,10 +443,16 @@ jobs:
         env:
           LIVE_URL: ${{ inputs.live_url }}
           REPLACE: ${{ inputs.replace_unreleased }}
+          VERSION: ${{ inputs.version }}
         run: |
           OUT="$RUNNER_TEMP/site"
           bash list/.github/scripts/live.sh seed "$OUT"
           bash list/.github/scripts/live.sh trust "$OUT" list/.github/state/lists.json
+          if [ "$VERSION" = resign ]; then
+            # After a key change (version: resign): every list re-signed with the main key, entries unchanged.
+            python3 list/.github/scripts/languages.py resign --key "$RUNNER_TEMP/sk/plugin-signing.key" --out "$OUT"
+            exit 0
+          fi
           python3 list/.github/scripts/languages.py sign \
             --key "$RUNNER_TEMP/sk/plugin-signing.key" \
             --live-url "$LIVE_URL" \
