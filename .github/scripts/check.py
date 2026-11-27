@@ -184,6 +184,8 @@ def check_source(src, entry, bad):
                 bad.append(f"{where}: icon_file {icon!r} is outside the folder")
             elif not p.is_file():
                 bad.append(f"{where}: icon_file {icon!r} is not in the folder")
+    if not icon and not m.get("icon_url") and not (entry or {}).get("icon_url"):
+        bad.append(f"{where}: a logo is required: add icon_file (a .svg or .png in the folder) or icon_url")
 
     acc = m.get("access")
     if not isinstance(acc, dict):
