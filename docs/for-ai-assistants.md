@@ -63,7 +63,7 @@ The plugin lives in the person's own **public** GitHub repo (the repo root, or a
 go.mod
 main.go                # plus any other .go files
 holyarrs-plugin.json   # the plugin's details, below
-icon.svg or icon.png   # optional logo
+icon.svg or icon.png   # logo, required
 README.md              # short: what it does, settings, hosts
 ```
 
@@ -79,6 +79,7 @@ README.md              # short: what it does, settings, hosts
   "licence": "MIT",
   "repo": "https://github.com/github-login/holyarrs-my-plugin",
   "support_email": "me@example.com",
+  "icon_file": "icon.svg",
   "min_app_version": "1.3.0",
   "access": { "hosts": ["api.example.com"], "folders": [], "actions": [] },
   "settings": [
@@ -105,8 +106,8 @@ Limits (characters unless it says entries). These are the stricter publish limit
 | `licence` | **required**, for example `MIT` or `AGPL-3.0` |
 | `support_email` | **required**; `support_url` optional, https only |
 | `repo` | https link to the public repo |
-| `icon_file` | optional, `.svg` or `.png` in the same folder |
-| `icon_url` | optional, direct https link to a logo, 16 to 4096 px a side, up to 2 MB; we copy it |
+| `icon_file` | `.svg` or `.png` in the same folder; a logo is required, as `icon_file` or `icon_url` |
+| `icon_url` | instead of `icon_file`, direct https link to a logo, 16 to 4096 px a side, up to 2 MB; we copy it |
 | `min_app_version` | required, `x.y.z`, `1.3.0` or newer for new plugins |
 | `access.hosts` | up to 100 entries of 80; no empty value, `..` or `\` |
 | `access.folders` | up to 100; a name (40 max, no `/`, `..`, `\` or `:`) or an object with `name`, `mode` (`read`/`read_write`), `why`, `required` |

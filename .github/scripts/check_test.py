@@ -8,7 +8,7 @@ import tempfile
 HERE = pathlib.Path(__file__).resolve().parent
 GOOD = {
     "id": "demo-plugin", "name": "Demo", "author": "someone", "description": "Shows a demo.",
-    "licence": "MIT", "support_email": "me@example.com", "min_app_version": "1.2.1",
+    "licence": "MIT", "support_email": "me@example.com", "min_app_version": "1.2.1", "icon_file": "icon.svg",
     "access": {"hosts": ["api.example.com"], "folders": [], "actions": []},
     "settings": [{"key": "api_key", "label": "API key", "type": "secret"},
                  {"key": "mode", "label": "Mode", "type": "select", "options": ["a", "b"], "default": "a"}],
@@ -25,6 +25,7 @@ def run(meta, extra=None, entry_extra=None):
         src.mkdir()
         (src / "go.mod").write_text("module demo\n")
         (src / "holyarrs-plugin.json").write_text(json.dumps(meta))
+        (src / "icon.svg").write_text("<svg/>")
         if extra:
             extra(t, src)
         r = subprocess.run([sys.executable, str(HERE / "check.py"), str(t / "demo-plugin.json"), "--src", str(src)],
@@ -98,4 +99,11 @@ try:
     assert code == 1 and "links are not allowed" in out, out
 except OSError as err:  # Windows without symlink rights
     print("symlink cases skipped:", err)
+no_logo = {k: v for k, v in GOOD.items() if k != "icon_file"}
+code, out = run(no_logo)
+assert code == 1 and "a logo is required" in out, out
+code, out = run({**no_logo, "icon_url": "https://example.com/logo.png"})
+assert code == 0, out
+code, out = run(no_logo, entry_extra={"icon_url": "https://example.com/logo.png"})
+assert code == 0, out
 print("check.py tests passed")

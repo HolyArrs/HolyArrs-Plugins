@@ -22,7 +22,7 @@ Your plugin folder sits at the root of your repo or in a subfolder. It holds:
 go.mod
 main.go               (and any other .go files)
 holyarrs-plugin.json
-icon.svg              (optional logo, .svg or .png)
+icon.svg              (your logo, .svg or .png, required)
 LICENSE               (at the repo root is fine)
 ```
 
@@ -122,7 +122,7 @@ func main() {
 | `category` | No | Up to 24 characters |
 | `developers` | No | Up to 5 GitHub user names |
 | `repo`, `support_url` | No | https links |
-| `icon_file` or `icon_url` | No | A `.svg` or `.png` in the folder, or an https link |
+| `icon_file` or `icon_url` | Yes | Your logo: a `.svg` or `.png` in the folder, or an https link |
 | `settings` | No | Up to 20, see below |
 
 All text is plain text. `<` and `>` aren't allowed.
@@ -206,7 +206,7 @@ Your code stays in your own repo; `catalog/` only lists it, the same way it list
 | `path` | Optional. The plugin folder, if it isn't the repo root |
 | `tag` | The release tag, up to 16 characters |
 | `commit` | The full 40-character commit of that tag |
-| `icon_url` | Optional. A direct https link to your logo |
+| `icon_url` | Optional. A direct https link to your logo, if `holyarrs-plugin.json` has none |
 | `min_app_version` | Optional here. 1.3.0 for new plugins |
 
 No other keys are allowed. A repo that holds several plugins can tag each one as `<id>-v1.0.0` (our own plugins in [`plugins/`](../plugins/) do). The template values are fake on purpose, and the check refuses them. The rules for this file live in [`template/plugin.schema.json`](template/plugin.schema.json); see [how the schema is used](template/README.md#how-the-schema-is-used).
