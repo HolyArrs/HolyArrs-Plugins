@@ -73,6 +73,7 @@ README.md              # short: what it does, settings, hosts
 {
   "id": "my-plugin",
   "name": "My Plugin",
+  "version": "1.0.0",
   "author": "github-login",
   "description": "One line that says what it does.",
   "licence": "MIT",
@@ -92,6 +93,7 @@ Limits (characters unless it says entries). These are the stricter publish limit
 |---|---|
 | `id` | `^[a-z0-9][a-z0-9-]{0,63}$`, same as the entry file name |
 | version (the tag) | tag up to 16 characters from `A-Z a-z 0-9 . _ -`; the tag minus a leading `v` must be a version like `1.0.0` (a suffix like `-beta.1` is allowed); a published version is never reused |
+| `version` in `holyarrs-plugin.json` | required, the tag's version (`1.0.0` for tag `1.0.0` or `v1.0.0`); developer mode refuses the file without it; publishing uses the tag |
 | `name` | required, up to 40 |
 | `author` | required, up to 40 |
 | `description` | one line, up to 160 |
